@@ -1,0 +1,54 @@
+[project]
+name = "Context9"
+version = "0.1.0"
+description = "MCP server for reading docs from GitHub"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "Dictria", email = "hypercarrot879072@gmail.com"}
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+dependencies = [
+    "mcp>=1.0.0",
+    "fastmcp>=0.1.0",
+    "requests>=2.31.0",
+    "pyyaml>=6.0",
+    "python-dotenv>=1.0.0",
+    "uvicorn>=0.40.0",
+    "loguru>=0.7.0",
+    "starlette>=0.27.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-mock>=3.11.0",
+    "pre-commit>=3.0.0",
+    "ruff>=0.6.0",
+]
+
+[project.scripts]
+context9 = "context9.server:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+
+[tool.ruff.lint]
+# Ignore E722 (bare except) globally for all Python files
+ignore = ["E722"]
+# Ignore E712 (comparison to False) in test files
+per-file-ignores = { "tests/**/*.py" = ["E712"] }
+

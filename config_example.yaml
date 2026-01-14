@@ -1,0 +1,12 @@
+repos:
+  - owner: OwnerName
+    repo: RepoName
+    branch: BranchName
+    root_spec_path: RootSpecPath
+  - owner: OwnerName
+    repo: RepoName
+    branch: BranchName
+  - owner: OwnerName
+    repo: RepoName
+    branch: BranchName
+    root_spec_path: RootSpecPath

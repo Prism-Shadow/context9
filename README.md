@@ -2,7 +2,7 @@
 
 An MCP (Model Context Protocol) server for reading documents from multiple GitHub repositories. Context9 provides a simple and efficient way to access documentation and files from GitHub repositories through the MCP protocol.
 
-## Features
+## 1. Features
 
 - **Multi-Repository Support**: Manage and access documents from multiple GitHub repositories
 - **GitHub Integration**: Read files directly from GitHub repositories using the GitHub REST API
@@ -14,17 +14,17 @@ An MCP (Model Context Protocol) server for reading documents from multiple GitHu
 - **API Authentication**: Bearer token authentication for secure access
 - **Simple URL Format**: Use `remotedoc://owner/repo/branch/path` URLs to reference files in your repositories
 - **Document Discovery**: Automatically discover available repositories and their documentation
-- **Automatic Path Rewriting**: Automatically rewrites relative paths in Markdown files to `remotedoc://` URLs for proper cross-referencing
+- **Automatic Path Rewriting**: Transparently rewrites relative paths in Markdown files to `remotedoc://` URLs for proper cross-referencing. User only need to focus on writing documentation in your repository using standard relative paths - Context9 handles the path conversion automatically, making document reading seamless and transparent
 
-## Requirements
+## 2. Requirements
 
 - Python >= 3.10
 - GitHub repository access (public or with authentication token)
 - Optional: GitHub webhook setup for event-based updates
 
-## Installation
+## 3. Installation
 
-### Using uv (Recommended)
+### 3.1. Using uv (Recommended)
 
 ```bash
 # Install the package
@@ -34,17 +34,17 @@ uv pip install -e .
 uv pip install -e .[dev]
 ```
 
-### Using pip
+### 3.2. Using pip
 
 ```bash
 pip install -e .
 ```
 
-## Configuration
+## 4. Configuration
 
 Context9 uses a YAML configuration file to manage multiple repositories. Create a `config.yaml` file in your project root:
 
-### Configuration File Format
+### 4.1. Configuration File Format
 
 Create a `config.yaml` file with the following structure:
 
@@ -71,34 +71,36 @@ repos:
 
 **Note:** You can see a complete example in `config_example.yaml`. Copy it to `config.yaml` and customize it with your repository information.
 
-### Environment Variables
+### 4.2. Environment Variables
 
 Set the following environment variables (create a `.env` file or export them):
 
-#### Required Configuration
+#### 4.2.1. Required Configuration
 
 - `CTX9_API_KEY`: API key for server authentication (required)
 
-#### Optional Configuration
+#### 4.2.2. Optional Configuration
 
 - `GITHUB_TOKEN`: GitHub personal access token (recommended for higher rate limits and private repositories)
-- `MCP_SERVER_NAME`: Custom server name (default: "Context9")
-- `MCP_SERVER_DESCRIPTION`: Custom server description
 
-### Example `.env` file
+### 4.3. Example `.env` file
 
 ```env
 GITHUB_TOKEN=ghp_your_token_here
 CTX9_API_KEY=your-api-key-here
 ```
 
-## Usage
+## 5. Usage
 
-### Starting the Server
+### 5.1. Starting the Server
 
 Context9 supports two modes of operation:
 
-#### Polling-Based Updates (Default)
+**Important:** You must specify either `--github_sync_interval` or `--enable_github_webhook` (they are mutually exclusive). Choose the mode that best fits your use case:
+- **Polling mode**: Suitable for development, testing, or when webhook setup is not feasible. Repositories are synchronized at regular intervals.
+- **Webhook mode**: Recommended for production environments. Provides real-time updates when changes are pushed to repositories, reducing unnecessary API calls and improving efficiency.
+
+#### 5.1.1. Polling-Based Updates (Default)
 
 Synchronizes repositories at regular intervals:
 
@@ -110,9 +112,9 @@ uv run python -m context9.server --github_sync_interval 60 --config_file config.
 uv run python -m context9.server --github_sync_interval 600 --config_file config.yaml
 ```
 
-**Note:** You must specify either `--github_sync_interval` or `--enable_github_webhook` (they are mutually exclusive).
+**Note:** Context9 automatically randomizes the `--github_sync_interval` value to avoid triggering GitHub rate limit restrictions. This means the actual sync interval may vary slightly from the specified value, which is normal and expected behavior.
 
-#### Event-Based Updates (GitHub Webhook)
+#### 5.1.2. Event-Based Updates (GitHub Webhook)
 
 Uses GitHub webhooks for real-time updates:
 
@@ -120,11 +122,9 @@ Uses GitHub webhooks for real-time updates:
 uv run python -m context9.server --enable_github_webhook --config_file config.yaml
 ```
 
-**Note:** When using webhook mode, `--github_sync_interval` cannot be used.
-
 The server will start on `http://0.0.0.0:8011` with the MCP endpoint at `/api/mcp/`.
 
-### GitHub Webhook Setup
+### 5.2. GitHub Webhook Setup
 
 If using webhook mode, configure GitHub webhooks for each repository:
 
@@ -137,11 +137,11 @@ If using webhook mode, configure GitHub webhooks for each repository:
 
 Repeat for each repository you want to monitor.
 
-### Using the MCP Tools
+### 5.3. Using the MCP Tools
 
 Once the server is running, you can use the following tools:
 
-#### Tool: `get_doc_list`
+#### 5.3.1. Tool: `get_doc_list`
 
 Get a list of all available repositories and their documentation.
 
@@ -170,7 +170,7 @@ print(result)
 # ]
 ```
 
-#### Tool: `read_doc`
+#### 5.3.2. Tool: `read_doc`
 
 Reads a document from GitHub using a `remotedoc://` URL.
 
@@ -197,7 +197,7 @@ print(result)
 
 **Note:** The URL format includes the repository owner, repository name, and branch to uniquely identify the file. Relative paths in Markdown files are automatically rewritten to `remotedoc://` URLs for proper cross-referencing.
 
-### API Authentication
+### 5.4. API Authentication
 
 All requests must include the API key using the **Authorization header with Bearer token format**:
 
@@ -213,17 +213,105 @@ curl -H "Authorization: Bearer your-api-key" http://localhost:8011/api/mcp/
 - The GitHub webhook endpoint (`/api/github`) does not require API key authentication as it uses GitHub's signature verification
 - The Authorization header is case-insensitive, but the Bearer token format is required
 
-## Docker Deployment
+### 5.5. Testing with MCP Inspector
 
-### Prerequisites
+MCP Inspector is an interactive developer tool for testing and debugging MCP servers. You can use it to verify Context9's functionality and test the available tools.
+
+#### 5.5.1. Installing MCP Inspector
+
+MCP Inspector can be run directly using npx without installation:
+
+```bash
+npx @modelcontextprotocol/inspector
+```
+
+Alternatively, you can install it globally:
+
+```bash
+npm install -g @modelcontextprotocol/inspector
+mcp-inspector
+```
+
+#### 5.5.2. Connecting to Context9 Server
+
+1. **Start Context9 Server**: Ensure your Context9 server is running (see [5.1. Starting the Server](#51-starting-the-server))
+
+2. **Launch MCP Inspector**: Run the inspector using one of the methods above
+
+3. **Configure Connection**: In MCP Inspector, configure the connection to your Context9 server:
+   - **Transport**: Select "HTTP" or "SSE" (Server-Sent Events)
+   - **URL**: Enter `http://localhost:8011/api/mcp/`
+   - **Headers**: Add the Authorization header:
+     ```
+     Authorization: Bearer your-api-key
+     ```
+     Replace `your-api-key` with the value from your `CTX9_API_KEY` environment variable
+
+#### 5.5.3. Testing Context9 Tools
+
+Once connected, you can test Context9's tools using MCP Inspector:
+
+**Testing `get_doc_list` Tool:**
+
+1. Navigate to the **Tools** tab in MCP Inspector
+2. Find the `get_doc_list` tool in the list
+3. Click on it to open the tool interface
+4. Click "Call Tool" (no parameters required)
+5. Review the results to verify:
+   - All configured repositories are listed
+   - Each repository has `repo_name`, `repo_description`, and `repo_spec_path`
+   - The `repo_spec_path` is in the correct `remotedoc://` format
+
+**Testing `read_doc` Tool:**
+
+1. In the **Tools** tab, find the `read_doc` tool
+2. Enter a test URL in the `url` parameter field:
+   ```
+   remotedoc://OwnerName/RepoName/BranchName/path/to/file.md
+   ```
+   Replace with actual values from your configuration
+3. Click "Call Tool"
+4. Verify the results:
+   - The document content is returned correctly
+   - Relative paths in Markdown files are rewritten to `remotedoc://` URLs
+   - The content matches the file in your repository
+
+#### 5.5.4. Additional Features
+
+MCP Inspector provides additional features for comprehensive testing:
+
+- **Resources Tab**: Lists all available resources (if any are exposed by the server)
+- **Prompts Tab**: Shows available prompt templates (if any are configured)
+- **Notifications Panel**: Displays logs and notifications from the server, useful for debugging connection issues or server errors
+
+#### 5.5.5. Troubleshooting
+
+If you encounter connection issues:
+
+1. **Verify Server Status**: Ensure Context9 is running and accessible:
+   ```bash
+   curl -H "Authorization: Bearer your-api-key" http://localhost:8011/api/mcp/
+   ```
+
+2. **Check API Key**: Verify that the API key in MCP Inspector matches your `CTX9_API_KEY` environment variable
+
+3. **Check Server Logs**: Review Context9 server logs for any error messages
+
+4. **Verify Configuration**: Ensure your `config.yaml` is properly configured and the server has successfully initialized repositories
+
+For more information about MCP Inspector, see the [official documentation](https://modelcontextprotocol.io/docs/tools/inspector).
+
+## 6. Docker Deployment
+
+### 6.1. Prerequisites
 
 - Docker 20.10+
 - At least 512MB available memory
 - At least 1GB available disk space
 
-### Quick Start
+### 6.2. Quick Start
 
-#### 1. Prepare Environment Variables
+#### 6.2.1. Prepare Environment Variables
 
 Create a `.env` file with the following content:
 
@@ -241,21 +329,21 @@ MCP_SERVER_DESCRIPTION=MCP server for reading docs from GitHub
 - `GITHUB_TOKEN` is used to increase GitHub API rate limits. It's recommended to create a GitHub Personal Access Token.
 - `CTX9_API_KEY` is required for API authentication. Clients need to include `Authorization: Bearer <your_api_key>` in request headers.
 
-#### 2. Prepare Configuration File
+#### 6.2.2. Prepare Configuration File
 
-Ensure you have a `config.yaml` file in your project root (see [Configuration](#configuration) section). The `config.yaml` file will be copied into the Docker image during the build process.
+Ensure you have a `config.yaml` file in your project root (see [Configuration](#4-configuration) section). The `config.yaml` file will be copied into the Docker image during the build process.
 
-#### 3. Build Docker Image
+#### 6.2.3. Build Docker Image
 
 ```bash
 docker build -t context9:latest .
 ```
 
-#### 4. Run Container
+#### 6.2.4. Run Container
 
 Context9 supports two synchronization modes:
 
-##### Polling Mode (Default)
+##### 6.2.4.1. Polling Mode (Default)
 
 Synchronizes repositories at regular intervals:
 
@@ -279,7 +367,9 @@ docker run -d \
   python -m context9.server --github_sync_interval 60 --config_file config.yaml
 ```
 
-##### Webhook Mode (Recommended for Production)
+**Note:** Context9 automatically randomizes the `--github_sync_interval` value to avoid triggering GitHub rate limit restrictions. This means the actual sync interval may vary slightly from the specified value, which is normal and expected behavior.
+
+##### 6.2.4.2. Webhook Mode (Recommended for Production)
 
 Uses GitHub webhooks for real-time updates:
 
@@ -304,29 +394,29 @@ docker run -d \
 
 Repeat for each repository you want to monitor.
 
-### Verify Deployment
+### 6.3. Verify Deployment
 
-#### Check Service Status
+#### 6.3.1. Check Service Status
 
 ```bash
 docker ps | grep context9
 ```
 
-#### Test Health Check
+#### 6.3.2. Test Health Check
 
 ```bash
 curl http://localhost:8011/api/mcp/
 ```
 
-#### View Logs
+#### 6.3.3. View Logs
 
 ```bash
 docker logs -f context9-server
 ```
 
-### Troubleshooting
+### 6.4. Troubleshooting
 
-#### Container Won't Start
+#### 6.4.1. Container Won't Start
 
 1. Check if environment variables are set correctly:
    ```bash
@@ -347,13 +437,13 @@ docker logs -f context9-server
    docker ps -a | grep context9
    ```
 
-#### API Requests Return 401/403
+#### 6.4.2. API Requests Return 401/403
 
 - Check if `CTX9_API_KEY` is set
 - Ensure request headers contain the correct `Authorization: Bearer <token>` format
 - Verify the API key matches the value in `CTX9_API_KEY` environment variable
 
-#### Webhook Not Working
+#### 6.4.3. Webhook Not Working
 
 1. Check if GitHub webhook configuration is correct
 2. Verify server is accessible from the internet
@@ -362,7 +452,7 @@ docker logs -f context9-server
    docker logs context9-server | grep webhook
    ```
 
-#### Container Keeps Restarting
+#### 6.4.4. Container Keeps Restarting
 
 1. Check container exit code:
    ```bash
@@ -374,7 +464,7 @@ docker logs -f context9-server
    docker logs --tail 100 context9-server
    ```
 
-### Update Deployment
+### 6.5. Update Deployment
 
 ```bash
 # Stop and remove old container
@@ -407,7 +497,7 @@ docker run -d \
   python -m context9.server --enable_github_webhook --config_file config.yaml
 ```
 
-### Uninstall
+### 6.6. Uninstall
 
 ```bash
 # Stop and remove container
@@ -418,9 +508,9 @@ docker rm context9-server
 docker rmi context9:latest
 ```
 
-## Development
+## 7. Development
 
-### Setup Development Environment
+### 7.1. Setup Development Environment
 
 ```bash
 # Install with development dependencies
@@ -430,7 +520,7 @@ uv pip install -e .[dev]
 uv run pre-commit install
 ```
 
-### Running Tests
+### 7.2. Running Tests
 
 ```bash
 # Run all tests
@@ -440,7 +530,7 @@ uv run pytest -vvv tests
 make test
 ```
 
-### Code Quality
+### 7.3. Code Quality
 
 ```bash
 # Check code quality
@@ -453,7 +543,7 @@ make style
 make commit
 ```
 
-## How It Works
+## 8. How It Works
 
 1. **Configuration**: Context9 reads repository configuration from `config.yaml` file
 2. **Multi-Repository Management**: Initializes GitHub clients for each configured repository
@@ -464,7 +554,7 @@ make commit
 7. **File Reading**: Fetches files from local cache and returns content
 8. **Path Rewriting**: Automatically rewrites relative paths in Markdown files to `remotedoc://` URLs for proper cross-referencing
 
-## Architecture
+## 9. Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -498,7 +588,7 @@ make commit
 └─────────────────────────────────────────────────────────┘
 ```
 
-## Error Handling
+## 10. Error Handling
 
 Context9 handles various error scenarios:
 
@@ -510,17 +600,17 @@ Context9 handles various error scenarios:
 - **Configuration Errors**: Validates configuration file and provides helpful error messages
 - **Path Traversal Protection**: Validates file paths to prevent directory traversal attacks
 
-## Examples
+## 11. Examples
 
 See the `examples/` directory for usage examples:
 
 - `basic_usage.py`: Basic usage examples
 - `client_discovery_example.py`: MCP client discovery and tool usage examples
 
-## License
+## 12. License
 
 Licensed under the Apache License, Version 2.0. See [LICENSE](LICENSE) for details.
 
-## Contributing
+## 13. Contributing
 
 Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.

@@ -4,24 +4,25 @@ version = "0.1.0"
 description = "MCP server for reading docs from GitHub"
 readme = "README.md"
 requires-python = ">=3.10"
-license = {text = "MIT"}
+license = {text = "Apache-2.0"}
 authors = [
     {name = "Dictria", email = "hypercarrot879072@gmail.com"}
 ]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
     "mcp>=1.0.0",
     "fastmcp>=0.1.0",
     "requests>=2.31.0",
+    "urllib3>=2.0.0",
     "pyyaml>=6.0",
     "python-dotenv>=1.0.0",
     "uvicorn>=0.40.0",

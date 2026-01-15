@@ -90,7 +90,7 @@ An example of `config.yaml` file. [config example](config.yaml)
 # config.yaml
 repos:
 # Private Repo 1
-  - owner: OwnerName                # 
+  - owner: OwnerName
     repo: RepoName
     branch: BranchName
     root_spec_path: RootSpecPath

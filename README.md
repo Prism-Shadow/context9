@@ -175,6 +175,7 @@ Paste the configuration below into `~/.cursor/mcp.json`. If you want to configur
 <details>
 <summary><b>Install in Claude Code</b></summary>
 Run the following command to add Context9 to Claude Code.
+
 ```shell
 claude mcp add --transport http Context9 <Context9_url>:8011/api/mcp/ --header "Authorization: Bearer <CTX9_API_KEY in .env>"
 ```

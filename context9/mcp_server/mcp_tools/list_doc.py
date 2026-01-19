@@ -24,7 +24,7 @@ def list_doc() -> list[dict[str, str]]:
         ValueError: If the documentation list cannot be read
         Exception: If an unexpected error occurs
     """
-    from .mcp_server import github_client
+    from ..github_client import github_client
 
     if not github_client:
         raise ValueError("Server not initialized. Please check configuration.")

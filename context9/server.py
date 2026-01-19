@@ -13,6 +13,13 @@ import uvicorn
 import yaml
 import os
 from .auth import APIKeyMiddleware
+from .database.init_db import initialize_database
+from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+from starlette.applications import Starlette
+from starlette.routing import Mount
+from .api import admin, api_keys, repositories
+from pathlib import Path
 
 
 def parse_args():
@@ -73,6 +80,17 @@ def read_config(config_file_path: str):
     return config
 
 
+class SelectiveAPIKeyMiddleware(APIKeyMiddleware):
+    """Middleware that only applies API key check to MCP endpoints, not admin endpoints."""
+
+    async def dispatch(self, request, call_next):
+        # Skip API key check for admin endpoints (they use JWT)
+        if request.url.path.startswith("/api/admin"):
+            return await call_next(request)
+        # Apply API key check for MCP endpoints
+        return await super().dispatch(request, call_next)
+
+
 def main():
     """Main entry point for the MCP server."""
 
@@ -84,13 +102,55 @@ def main():
         logger.info("GitHub webhook is enabled")
     else:
         logger.info("GitHub webhook is disabled")
+
+    # Initialize database
+    logger.info("Initializing database...")
+    try:
+        initialize_database()
+    except Exception as e:
+        logger.warning(f"Database initialization warning: {e}")
+
     # Initialize server
     logger.info("Initializing MCP server...")
     api_key, github_client, context9_mcp = initialize_mcp_server(args)
     logger.info("MCP server initialized")
 
     # Create the MCP server as a Starlette app
-    app = context9_mcp.http_app(path="/api/mcp/")
+    mcp_app = context9_mcp.http_app(path="/api/mcp/")
+
+    # Create FastAPI app for admin panel
+    admin_app = FastAPI(title="Context9 Admin API", version="0.1.0")
+
+    # Setup admin API routes (must be before static files)
+    admin_app.include_router(admin.router, prefix="/api/admin", tags=["admin"])
+    admin_app.include_router(
+        api_keys.router, prefix="/api/admin/api-keys", tags=["api-keys"]
+    )
+    admin_app.include_router(
+        repositories.router, prefix="/api/admin/repositories", tags=["repositories"]
+    )
+
+    # Mount frontend static files if they exist (production mode)
+    # This must be after API routes to ensure API routes take precedence
+    gui_dist_path = Path(__file__).parent.parent.parent / "gui" / "dist"
+    if gui_dist_path.exists() and (gui_dist_path / "index.html").exists():
+        logger.info(f"Serving frontend from {gui_dist_path}")
+        # Mount static files, but exclude /api routes
+        admin_app.mount(
+            "/", StaticFiles(directory=str(gui_dist_path), html=True), name="static"
+        )
+    else:
+        logger.info(
+            "Frontend build not found, serving API only. Run 'npm run build' in gui/ to build frontend."
+        )
+
+    # Create main app that combines both
+    app = Starlette(
+        routes=[
+            Mount("/api/mcp", app=mcp_app),
+            Mount("", app=admin_app),
+        ]
+    )
 
     # Setup GitHub webhook route
     app.add_route("/api/github", github_client.handle_github_webhook, methods=["POST"])
@@ -98,10 +158,11 @@ def main():
         f"GitHub webhook endpoint available at http://0.0.0.0:{args.port}/api/github"
     )
 
-    # Add API key authentication middleware
-    app.add_middleware(APIKeyMiddleware, api_key=api_key)
+    # Add selective API key authentication middleware
+    app.add_middleware(SelectiveAPIKeyMiddleware, api_key=api_key)
 
     logger.info(f"MCP server running on http://0.0.0.0:{args.port}/api/mcp/")
+    logger.info(f"Admin API running on http://0.0.0.0:{args.port}/api/admin/")
 
     uvicorn.run(app, host="0.0.0.0", port=args.port, log_level="info")
 

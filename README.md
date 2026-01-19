@@ -31,20 +31,24 @@ Bring Living Documentation into Your AI Context — Securely, Locally, and Under
 <td width="50%" valign="top" align="center">
 <h3>❌ Without Context9</h3>
 <div align="left">
-- ❌ Relies on outdated code documentation and examples
-- ❌ Private team knowledge risks leakage through public MCP infrastructure
-- ❌ Constant document syncing introduces significant cost and friction
-- ❌ No access to private or internal documentation
+<ul>
+  <li>❌ Relies on outdated code documentation and examples</li>
+  <li>❌ Private team knowledge risks leakage through public MCP infrastructure</li>
+  <li>❌ Constant document syncing introduces significant cost and friction</li>
+  <li>❌ No access to private or internal documentation</li>
+</ul>
 </div>
 </td>
 
 <td width="50%" valign="top" align="center">
 <h3>✅ With Context9</h3>
 <div align="left">
-- ✅ Always operates on up-to-date code documentation and examples
-- ✅ Deployed within the team to keep documentation secure and private
-- ✅ Seamless document management designed for agile development, transparent to users
-- ✅ Unified access to live documentation across private and public sources
+<ul>
+  <li>✅ Always operates on up-to-date code documentation and examples</li>
+  <li>✅ Deployed within the team to keep documentation secure and private</li>
+  <li>✅ Seamless document management designed for agile development, transparent to users</li>
+  <li>✅ Unified access to live documentation across private and public sources</li>
+</ul>
 </div>
 </td>
 </tr>
@@ -53,22 +57,27 @@ Bring Living Documentation into Your AI Context — Securely, Locally, and Under
 <td width="50%" valign="top" align="center">
 <h3>🔒 It runs locally</h3>
 <div align="left">
-- Your code and docs never leave your infrastructure
-- Deployed inside your team’s network or on personal machines
-- No external dependency or cloud latency in the documentation loop
+<ul>
+  <li>Your code and docs never leave your infrastructure</li>
+  <li>Deployed inside your team’s network or on personal machines</li>
+  <li>No external dependency or cloud latency in the documentation loop</li>
+</ul>
 </div>
 </td>
 
 <td width="50%" valign="top" align="center">
 <h3>🎯 It keeps agents focused</h3>
 <div align="left">
-- Light-weight, only relevant repositories are included in context
-- No global crawling or searching across massive codebases
-- Reduced context window size, fewer hallucinations
+<ul>
+  <li>Light-weight, only relevant repositories are included in context</li>
+  <li>No global crawling or searching across massive codebases</li>
+  <li>Reduced context window size, fewer hallucinations</li>
+</ul>
 </div>
 </td>
 </tr>
 </table>
+
 
 ## What Context9 Actually Does
 

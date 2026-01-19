@@ -16,6 +16,7 @@
 <div align="center">
 
 [![Apache 2.0 licensed](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+![MCP](https://img.shields.io/badge/MCP-Native-brightgreen)
 
 </div>
 

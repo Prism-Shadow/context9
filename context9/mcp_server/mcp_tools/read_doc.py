@@ -25,7 +25,7 @@ def read_doc(url: str) -> str:
         ValueError: If the URL is invalid or the file cannot be read
     """
     # remotedoc://owner/repo/branch/url
-    from ..github_client import github_client
+    from ..mcp_server import github_client
 
     if not github_client:
         raise ValueError("Server not initialized. Please check configuration.")

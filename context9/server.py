@@ -87,7 +87,9 @@ class SelectiveAPIKeyMiddleware(APIKeyMiddleware):
     async def dispatch(self, request, call_next):
         # Skip API key check for admin endpoints (they use JWT)
         if request.url.path.startswith("/api/admin"):
-            logger.info(f"Skipping API key check for admin endpoint: {request.url.path}")
+            logger.info(
+                f"Skipping API key check for admin endpoint: {request.url.path}"
+            )
             return await call_next(request)
         # Apply API key check for MCP endpoints
         logger.info(f"Applying API key check for endpoint: {request.url.path}")
@@ -117,7 +119,9 @@ def main():
         logger.error("Please check:")
         logger.error("  1. Database file permissions")
         logger.error("  2. Database file is not corrupted")
-        logger.error("  3. CONTEXT9_ADMIN_USERNAME and CONTEXT9_ADMIN_PASSWORD environment variables (if set)")
+        logger.error(
+            "  3. CONTEXT9_ADMIN_USERNAME and CONTEXT9_ADMIN_PASSWORD environment variables (if set)"
+        )
         logger.error("You can try running: python -m context9.database.init_db")
         # Still continue - user might want to fix it manually
         logger.warning("Server will start, but admin functionality may not work.")

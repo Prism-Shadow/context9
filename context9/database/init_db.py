@@ -14,7 +14,7 @@ def create_default_admin(username: str = "admin", password: str = "admin123"):
         # Check if any admin exists
         admin_count = db.query(Admin).count()
         logger.info(f"Current admin count in database: {admin_count}")
-        
+
         existing_admin = db.query(Admin).filter(Admin.username == username).first()
         if existing_admin:
             logger.info(f"Admin user '{username}' already exists")
@@ -41,7 +41,9 @@ def ensure_default_admin_exists():
     try:
         admin_count = db.query(Admin).count()
         if admin_count == 0:
-            logger.warning("No admin users found in database. Creating default admin...")
+            logger.warning(
+                "No admin users found in database. Creating default admin..."
+            )
             admin_username = os.getenv("CONTEXT9_ADMIN_USERNAME", "admin")
             admin_password = os.getenv("CONTEXT9_ADMIN_PASSWORD", "admin123")
             create_default_admin(admin_username, admin_password)
@@ -72,14 +74,20 @@ def initialize_database():
     try:
         admin = create_default_admin(admin_username, admin_password)
         if admin:
-            logger.info(f"Database initialization completed successfully. Default admin '{admin_username}' is available.")
+            logger.info(
+                f"Database initialization completed successfully. Default admin '{admin_username}' is available."
+            )
         else:
-            logger.warning("Database initialization completed but default admin creation returned None")
+            logger.warning(
+                "Database initialization completed but default admin creation returned None"
+            )
             # Try to ensure at least one admin exists
             ensure_default_admin_exists()
     except Exception as e:
         logger.error(f"Failed to create default admin user: {e}")
-        logger.error("This is a critical error. Admin login will not work until an admin user is created.")
+        logger.error(
+            "This is a critical error. Admin login will not work until an admin user is created."
+        )
         # Try one more time with ensure function
         try:
             logger.info("Attempting to ensure default admin exists...")

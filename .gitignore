@@ -2,8 +2,6 @@
 **/*_results/
 **/config.yaml
 **/config_tmp.yaml
-**/*.json
-**/*.jsonl
 **/nohup.out
 **/.env
 *.txt

@@ -1,10 +1,10 @@
 ![Cover](TODO)
 
-# Context9 - Open Source, Real-Time MCP Doc Server for AI Agents
+# Context9 - Local, Real-Time MCP Server for Private and Public Docs.
 
 <div align="center">
-  <h3>Bring Living Documentation into Your AI Context</h3>
-  <p><b>Securely</b> &middot; <b>Locally</b> &middot; <b>Fully Under Your Control</b></p>
+  <h3>Bring Living Documentation into Your AI Context & Team</h3>
+  <p><b>Secure</b> &middot; <b>Open-source</b> &middot; <b>Fully Under Your Control</b></p>
 </div>
 
 <div align="center">
@@ -340,16 +340,7 @@ As long as these links are valid within the repository, Context9 will:
 
 </details>
 
-
-
 <br />
-
-
-
 
 ## ⭐ Star History
 [![Star History Chart](https://api.star-history.com/svg?repos=Prism-Shadow/context9&type=Date)](https://www.star-history.com/#Prism-Shadow/context9&Date)
-
-
-
-

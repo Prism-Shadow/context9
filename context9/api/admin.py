@@ -85,26 +85,28 @@ def change_password(
 ):
     """Change admin password."""
     logger.info(f"Password change request for admin: {admin.username}")
-    
+
     # Verify current password
     if not verify_password(request.current_password, admin.password_hash):
-        logger.warning(f"Current password verification failed for admin: {admin.username}")
+        logger.warning(
+            f"Current password verification failed for admin: {admin.username}"
+        )
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Current password is incorrect",
         )
-    
+
     # Validate new password
     if not request.new_password or len(request.new_password) < 6:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="New password must be at least 6 characters long",
         )
-    
+
     # Update password
     admin.password_hash = get_password_hash(request.new_password)
     db.commit()
     db.refresh(admin)
-    
+
     logger.info(f"Password changed successfully for admin: {admin.username}")
     return {"message": "Password changed successfully"}

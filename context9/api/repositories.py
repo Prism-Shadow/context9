@@ -98,7 +98,8 @@ def get_repositories(
                 "github_token_updated_at": convert_to_client_timezone(
                     repo.github_token_updated_at, client_tz
                 ),
-                "created_at": convert_to_client_timezone(repo.created_at, client_tz) or "",
+                "created_at": convert_to_client_timezone(repo.created_at, client_tz)
+                or "",
                 "updated_at": convert_to_client_timezone(repo.updated_at, client_tz),
             }
         )
@@ -279,7 +280,8 @@ def set_github_token(
         github_token=request.github_token,  # Return once
         github_token_created_at=convert_to_client_timezone(
             repo.github_token_created_at, client_tz
-        ) or "",
+        )
+        or "",
         github_token_updated_at=convert_to_client_timezone(
             repo.github_token_updated_at, client_tz
         ),
@@ -319,7 +321,8 @@ def update_github_token(
         else convert_to_client_timezone(get_utc_now(), client_tz) or "",
         github_token_updated_at=convert_to_client_timezone(
             repo.github_token_updated_at, client_tz
-        ) or "",
+        )
+        or "",
     )
 
 

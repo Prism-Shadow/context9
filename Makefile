@@ -1,4 +1,4 @@
-.PHONY: default build commit quality style test
+.PHONY: default build commit quality style test dev dev-backend dev-frontend build-frontend
 
 check_dirs := .
 
@@ -23,3 +23,22 @@ style:
 test:
 	uv pip install -e .[tests]
 	uv run pytest -vvv tests
+
+# Development commands
+dev:
+	@echo "Starting both backend and frontend servers..."
+	@python scripts/start_dev.py --github_sync_interval 600 --config_file config.yaml
+
+dev-backend:
+	@echo "Starting backend server only..."
+	@python scripts/start_dev.py --backend-only --github_sync_interval 600 --config_file config.yaml
+
+dev-frontend:
+	@echo "Starting frontend server only..."
+	@python scripts/start_dev.py --frontend-only --github_sync_interval 600 --config_file config.yaml
+
+# Build frontend for production
+build-frontend:
+	@echo "Building frontend for production..."
+	@cd gui && npm run build
+	@echo "Frontend built! Now backend will serve static files automatically."

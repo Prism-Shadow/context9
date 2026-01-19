@@ -2,9 +2,14 @@
 
 # Context9 - Open Source, Real-Time MCP Doc Server for AI Agents
 
-Bring Living Documentation into Your AI Context — Securely, Locally, and Under Your Control
+> **Bring Living Documentation into Your AI Context**  
+> _Securely · Locally · Fully Under Your Control_
+
+<div align="center">
 
 [![Apache 2.0 licensed](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+
+</div>
 
 [![简体中文](https://img.shields.io/badge/docs-简体中文-orange)](./docs/README.zh-CN.md)
 [![繁體中文](https://img.shields.io/badge/docs-繁體中文-darkorange)](./docs/README.zh-TW.md)
@@ -79,9 +84,9 @@ Bring Living Documentation into Your AI Context — Securely, Locally, and Under
 </table>
 
 
-## What Context9 Actually Does
+## 🚀 What Context9 Actually Does
 
-🚀 **Context9 (Context Mine)** is an MCP (Model Context Protocol) server designed for modern development teams, enabling AI assistants and code agents to securely and timely access documentation while maintaining full privacy control.
+**Context9 (Context Mine)** is an MCP (Model Context Protocol) server designed for modern development teams, enabling AI assistants and code agents to securely and timely access documentation while maintaining full privacy control.
 
 <table>
   <tr>
@@ -149,7 +154,7 @@ Deploy the latest version of the backend server following the documentation with
 | Step | Action | Details |
 |:----:|--------|---------|
 | **1** | **Deploy Context9** | Start Context9 MCP service on your own server, see [Deployment](#deployment) |
-| **2** | **Integrate Context9 with Agent** | Bring living and secured documentation to your agent, see [Integrate](#integrate-context9-with-agent) |
+| **2** | **Integrate Context9 with Agent** | Connect Cursor / Claude Code, see [Integrate](#integrate-context9-with-agent) |
 | **3** | **Update Docs** | Enable agile development with up-to-date docs, see [Update](#work-with-context9) |
 
 ## Deployment

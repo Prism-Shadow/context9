@@ -300,7 +300,10 @@ your-repo/
 │   └── ...
 └── ...
 </code></pre>
-> If you need to use a different filename or path, coordinate with the Context9 administrator to update the repository configuration.
+
+<blockquote>
+If you need to use a different filename or path, coordinate with the Context9 administrator to update the repository configuration.
+</blockquote>
 
 </details>
 

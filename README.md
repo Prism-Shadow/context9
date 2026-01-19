@@ -189,7 +189,7 @@ uv pip install -e .[dev]
 
 Configure the repositories you need in `config.yaml` (private & public repositories)
 
-An example of `config.yaml` file. [config example](config.yaml)
+An example of `config.yaml` file. [config example](config_example.yaml)
 ```yaml
 # config.yaml
 repos:
@@ -218,8 +218,19 @@ Simply specify the repository owner, name, and branch in <code>config.yaml</code
 
 <details>
 <summary><b>Configure private repos</b></summary>
-1. Specify the repository owner, name, and branch in <code>config.yaml</code>.
-2. Add an authentication token with repository access permissions to your environment. [Configure environment](#configure-environment)
+
+<ol>
+  <li>
+    Specify the repository owner, name, and branch in
+    <code>config.yaml</code>.
+  </li>
+  <li>
+    Add an authentication token with repository access permissions
+    to your environment.
+    <a href="#configure-environment">Configure environment</a>
+  </li>
+</ol>
+
 </details>
 
 #### Configure Environment

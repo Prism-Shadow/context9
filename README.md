@@ -146,8 +146,11 @@ Deploy the latest version of the backend server following the documentation with
 
 ## How to use it
 
-- To deploy Context9 for your team or personal use, see [Deployment](#deployment).
-- If you already have a Context9 service running and want to connect it to Cursor or Claude Code, see [Integrate Context9 with Your Agent](#integrate-context9-with-your-agent).
+| Step | Action | Details |
+|:----:|--------|---------|
+| **1** | **Deploy Context9** | Start Context9 MCP service on your own server, see [Deployment](#deployment) |
+| **2** | **Integrate Context9 with Agent** | Bring living and secured documentation to your agent, see [Integrate](#integrate-context9-with-agent) |
+| **3** | **Update Docs** | Enable agile development with up-to-date docs, see [Update](#work-with-context9) |
 
 ## Deployment
 

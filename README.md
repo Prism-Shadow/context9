@@ -7,6 +7,12 @@
 
 <div align="center">
 
+**[Website](TODO)** · **[X](TODO)** · **[Discord](TODO)** · **[Issues](TODO)**
+
+</div>
+
+<div align="center">
+
 [![Apache 2.0 licensed](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
 </div>
@@ -37,10 +43,8 @@
 <h3>❌ Without Context9</h3>
 <div align="left">
 <ul>
-  <li>❌ Relies on outdated code documentation and examples</li>
-  <li>❌ Private team knowledge risks leakage through public MCP infrastructure</li>
-  <li>❌ Constant document syncing introduces significant cost and friction</li>
-  <li>❌ No access to private or internal documentation</li>
+  <li>❌ Uses outdated docs and examples</li>
+  <li>❌ Private knowledge is hard to access and easy to leak</li>
 </ul>
 </div>
 </td>
@@ -49,10 +53,8 @@
 <h3>✅ With Context9</h3>
 <div align="left">
 <ul>
-  <li>✅ Always operates on up-to-date code documentation and examples</li>
-  <li>✅ Deployed within the team to keep documentation secure and private</li>
-  <li>✅ Seamless document management designed for agile development, transparent to users</li>
-  <li>✅ Unified access to live documentation across private and public sources</li>
+  <li>✅ Always uses the latest docs from real repos</li>
+  <li>✅ Secure access to both private and public docs</li>
 </ul>
 </div>
 </td>
@@ -63,9 +65,8 @@
 <h3>🔒 It runs locally</h3>
 <div align="left">
 <ul>
-  <li>Your code and docs never leave your infrastructure</li>
-  <li>Deployed inside your team’s network or on personal machines</li>
-  <li>No external dependency or cloud latency in the documentation loop</li>
+  <li>Your code and docs stay inside your server</li>
+  <li>No cloud dependency or extra sync overhead</li>
 </ul>
 </div>
 </td>
@@ -74,15 +75,13 @@
 <h3>🎯 It keeps agents focused</h3>
 <div align="left">
 <ul>
-  <li>Light-weight, only relevant repositories are included in context</li>
-  <li>No global crawling or searching across massive codebases</li>
-  <li>Reduced context window size, fewer hallucinations</li>
+  <li>Only relevant repositories are included in context</li>
+  <li>Smaller context, fewer hallucinations</li>
 </ul>
 </div>
 </td>
 </tr>
 </table>
-
 
 ## 🚀 What Context9 Actually Does
 
@@ -291,14 +290,14 @@ claude mcp add --transport http Context9 <Context9_url>:8011/api/mcp/ --header "
 <summary><b>1. Set up entry documentation</b></summary>
 To enable Context9 to correctly discover and index your repository documentation, each repository should provide a Spec document.
 By default, Context9 expects a file named spec.md at the root of the repository.
-```text
+<pre><code>
 your-repo/
 ├── spec.md          ← Specification entry point
 ├── README.md
 ├── docs/
 │   └── ...
 └── ...
-```
+</code></pre>
 > If you need to use a different filename or path, coordinate with the Context9 administrator to update the repository configuration.
 
 </details>
@@ -329,11 +328,7 @@ As long as these links are valid within the repository, Context9 will:
 
 <br />
 
-<div align="center">
 
-**[Website](TODO)** · **[X](TODO)** · **[Discord](TODO)** · **[Issues](TODO)**
-
-</div>
 
 
 ## ⭐ Star History

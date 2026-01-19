@@ -3,7 +3,7 @@
 # Context9 - Open Source, Real-Time MCP Doc Server for AI Agents
 
 <div align="center">
-  <h2>Bring Living Documentation into Your AI Context</h2>
+  <h3>Bring Living Documentation into Your AI Context</h3>
   <p><b>Securely</b> &middot; <b>Locally</b> &middot; <b>Fully Under Your Control</b></p>
 </div>
 

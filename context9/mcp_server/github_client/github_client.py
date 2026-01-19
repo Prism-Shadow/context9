@@ -15,6 +15,7 @@ import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from loguru import logger
+from .rw_lock import ReadWriteLock, ReadLockContext, WriteLockContext
 from starlette.responses import JSONResponse
 from starlette import status
 from starlette.requests import Request
@@ -100,7 +101,7 @@ class GitHubClient:
         for repo in self.repos:
             repo["sync_timer"] = None
             repo["is_syncing"] = False
-            repo["sync_lock"] = threading.Lock()
+            repo["sync_lock"] = ReadWriteLock()
 
         # Create session with retry strategy (still needed for initial clone)
         self.session = requests.Session()
@@ -151,7 +152,7 @@ class GitHubClient:
             logger.debug("Sync already in progress, skipping...")
             return
 
-        with repo["sync_lock"]:
+        with WriteLockContext(repo["sync_lock"]):
             repo["is_syncing"] = True
             try:
                 repo_url = self._get_repo_url(repo)
@@ -452,9 +453,9 @@ class GitHubClient:
                 error_msg = f"Repository cache not available and sync failed: {e}"
                 raise GitHubClientError(error_msg)
 
-        # Use sync lock to prevent race conditions with _sync_repository
-        # This ensures file reads don't happen during git operations (git reset --hard)
-        with repo["sync_lock"]:
+        # Use read lock to allow concurrent reads while preventing race conditions with _sync_repository
+        # Multiple readers can read simultaneously, but write operations (git reset --hard) require exclusive access
+        with ReadLockContext(repo["sync_lock"]):
             try:
                 # Check if file exists
                 if not local_file_path.exists():

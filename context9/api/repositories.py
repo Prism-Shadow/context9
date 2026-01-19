@@ -2,8 +2,7 @@
 
 import requests
 from typing import List, Optional
-from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 
@@ -11,6 +10,11 @@ from ..database import get_db
 from ..database.models import Repository
 from ..auth.admin_auth import get_current_admin
 from ..auth.encryption import encrypt_token, decrypt_token
+from ..utils.datetime_utils import (
+    get_utc_now,
+    convert_to_client_timezone,
+    get_client_timezone,
+)
 
 router = APIRouter()
 
@@ -71,10 +75,12 @@ class VerifyGithubTokenResponse(BaseModel):
 
 @router.get("", response_model=dict)
 def get_repositories(
+    request: Request,
     admin=Depends(get_current_admin),
     db: Session = Depends(get_db),
 ):
     """Get all repositories."""
+    client_tz = get_client_timezone(request)
     repos = db.query(Repository).all()
     items = []
     for repo in repos:
@@ -86,14 +92,14 @@ def get_repositories(
                 "branch": repo.branch,
                 "root_spec_path": repo.root_spec_path,
                 "has_github_token": repo.github_token_encrypted is not None,
-                "github_token_created_at": repo.github_token_created_at.isoformat()
-                if repo.github_token_created_at
-                else None,
-                "github_token_updated_at": repo.github_token_updated_at.isoformat()
-                if repo.github_token_updated_at
-                else None,
-                "created_at": repo.created_at.isoformat(),
-                "updated_at": repo.updated_at.isoformat() if repo.updated_at else None,
+                "github_token_created_at": convert_to_client_timezone(
+                    repo.github_token_created_at, client_tz
+                ),
+                "github_token_updated_at": convert_to_client_timezone(
+                    repo.github_token_updated_at, client_tz
+                ),
+                "created_at": convert_to_client_timezone(repo.created_at, client_tz) or "",
+                "updated_at": convert_to_client_timezone(repo.updated_at, client_tz),
             }
         )
     return {"items": items, "total": len(items)}
@@ -104,6 +110,7 @@ def get_repositories(
 )
 def create_repository(
     request: CreateRepositoryRequest,
+    http_request: Request,
     admin=Depends(get_current_admin),
     db: Session = Depends(get_db),
 ):
@@ -134,13 +141,14 @@ def create_repository(
     github_token_plain = None
     if request.github_token:
         repo.github_token_encrypted = encrypt_token(request.github_token)
-        repo.github_token_created_at = datetime.utcnow()
+        repo.github_token_created_at = get_utc_now()
         github_token_plain = request.github_token  # Return once
 
     db.add(repo)
     db.commit()
     db.refresh(repo)
 
+    client_tz = get_client_timezone(http_request)
     response_data = {
         "id": repo.id,
         "owner": repo.owner,
@@ -148,14 +156,14 @@ def create_repository(
         "branch": repo.branch,
         "root_spec_path": repo.root_spec_path,
         "has_github_token": repo.github_token_encrypted is not None,
-        "github_token_created_at": repo.github_token_created_at.isoformat()
-        if repo.github_token_created_at
-        else None,
-        "github_token_updated_at": repo.github_token_updated_at.isoformat()
-        if repo.github_token_updated_at
-        else None,
-        "created_at": repo.created_at.isoformat(),
-        "updated_at": repo.updated_at.isoformat() if repo.updated_at else None,
+        "github_token_created_at": convert_to_client_timezone(
+            repo.github_token_created_at, client_tz
+        ),
+        "github_token_updated_at": convert_to_client_timezone(
+            repo.github_token_updated_at, client_tz
+        ),
+        "created_at": convert_to_client_timezone(repo.created_at, client_tz) or "",
+        "updated_at": convert_to_client_timezone(repo.updated_at, client_tz),
     }
 
     if github_token_plain:
@@ -168,6 +176,7 @@ def create_repository(
 def update_repository(
     repo_id: int,
     request: UpdateRepositoryRequest,
+    http_request: Request,
     admin=Depends(get_current_admin),
     db: Session = Depends(get_db),
 ):
@@ -191,13 +200,14 @@ def update_repository(
     if request.github_token is not None:
         repo.github_token_encrypted = encrypt_token(request.github_token)
         if repo.github_token_created_at is None:
-            repo.github_token_created_at = datetime.utcnow()
-        repo.github_token_updated_at = datetime.utcnow()
+            repo.github_token_created_at = get_utc_now()
+        repo.github_token_updated_at = get_utc_now()
         github_token_plain = request.github_token  # Return once
 
     db.commit()
     db.refresh(repo)
 
+    client_tz = get_client_timezone(http_request)
     response_data = {
         "id": repo.id,
         "owner": repo.owner,
@@ -205,14 +215,14 @@ def update_repository(
         "branch": repo.branch,
         "root_spec_path": repo.root_spec_path,
         "has_github_token": repo.github_token_encrypted is not None,
-        "github_token_created_at": repo.github_token_created_at.isoformat()
-        if repo.github_token_created_at
-        else None,
-        "github_token_updated_at": repo.github_token_updated_at.isoformat()
-        if repo.github_token_updated_at
-        else None,
-        "created_at": repo.created_at.isoformat(),
-        "updated_at": repo.updated_at.isoformat() if repo.updated_at else None,
+        "github_token_created_at": convert_to_client_timezone(
+            repo.github_token_created_at, client_tz
+        ),
+        "github_token_updated_at": convert_to_client_timezone(
+            repo.github_token_updated_at, client_tz
+        ),
+        "created_at": convert_to_client_timezone(repo.created_at, client_tz) or "",
+        "updated_at": convert_to_client_timezone(repo.updated_at, client_tz),
     }
 
     if github_token_plain:
@@ -243,6 +253,7 @@ def delete_repository(
 def set_github_token(
     repo_id: int,
     request: SetGithubTokenRequest,
+    http_request: Request,
     admin=Depends(get_current_admin),
     db: Session = Depends(get_db),
 ):
@@ -256,19 +267,22 @@ def set_github_token(
 
     repo.github_token_encrypted = encrypt_token(request.github_token)
     if repo.github_token_created_at is None:
-        repo.github_token_created_at = datetime.utcnow()
-    repo.github_token_updated_at = datetime.utcnow()
+        repo.github_token_created_at = get_utc_now()
+    repo.github_token_updated_at = get_utc_now()
 
     db.commit()
     db.refresh(repo)
 
+    client_tz = get_client_timezone(http_request)
     return SetGithubTokenResponse(
         id=repo.id,
         github_token=request.github_token,  # Return once
-        github_token_created_at=repo.github_token_created_at.isoformat(),
-        github_token_updated_at=repo.github_token_updated_at.isoformat()
-        if repo.github_token_updated_at
-        else None,
+        github_token_created_at=convert_to_client_timezone(
+            repo.github_token_created_at, client_tz
+        ) or "",
+        github_token_updated_at=convert_to_client_timezone(
+            repo.github_token_updated_at, client_tz
+        ),
     )
 
 
@@ -276,6 +290,7 @@ def set_github_token(
 def update_github_token(
     repo_id: int,
     request: SetGithubTokenRequest,
+    http_request: Request,
     admin=Depends(get_current_admin),
     db: Session = Depends(get_db),
 ):
@@ -288,18 +303,23 @@ def update_github_token(
         )
 
     repo.github_token_encrypted = encrypt_token(request.github_token)
-    repo.github_token_updated_at = datetime.utcnow()
+    repo.github_token_updated_at = get_utc_now()
 
     db.commit()
     db.refresh(repo)
 
+    client_tz = get_client_timezone(http_request)
     return SetGithubTokenResponse(
         id=repo.id,
         github_token=request.github_token,  # Return once
-        github_token_created_at=repo.github_token_created_at.isoformat()
+        github_token_created_at=convert_to_client_timezone(
+            repo.github_token_created_at, client_tz
+        )
         if repo.github_token_created_at
-        else datetime.utcnow().isoformat(),
-        github_token_updated_at=repo.github_token_updated_at.isoformat(),
+        else convert_to_client_timezone(get_utc_now(), client_tz) or "",
+        github_token_updated_at=convert_to_client_timezone(
+            repo.github_token_updated_at, client_tz
+        ) or "",
     )
 
 

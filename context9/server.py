@@ -16,6 +16,7 @@ from .auth import APIKeyMiddleware
 from .database.init_db import initialize_database
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 from starlette.applications import Starlette
 from starlette.routing import Mount
 from .api import admin, api_keys, repositories
@@ -86,8 +87,10 @@ class SelectiveAPIKeyMiddleware(APIKeyMiddleware):
     async def dispatch(self, request, call_next):
         # Skip API key check for admin endpoints (they use JWT)
         if request.url.path.startswith("/api/admin"):
+            logger.info(f"Skipping API key check for admin endpoint: {request.url.path}")
             return await call_next(request)
         # Apply API key check for MCP endpoints
+        logger.info(f"Applying API key check for endpoint: {request.url.path}")
         return await super().dispatch(request, call_next)
 
 
@@ -107,8 +110,17 @@ def main():
     logger.info("Initializing database...")
     try:
         initialize_database()
+        logger.info("Database initialization completed successfully")
     except Exception as e:
-        logger.warning(f"Database initialization warning: {e}")
+        logger.error(f"Database initialization failed: {e}")
+        logger.error("This is a critical error. Admin login will not work.")
+        logger.error("Please check:")
+        logger.error("  1. Database file permissions")
+        logger.error("  2. Database file is not corrupted")
+        logger.error("  3. CONTEXT9_ADMIN_USERNAME and CONTEXT9_ADMIN_PASSWORD environment variables (if set)")
+        logger.error("You can try running: python -m context9.database.init_db")
+        # Still continue - user might want to fix it manually
+        logger.warning("Server will start, but admin functionality may not work.")
 
     # Initialize server
     logger.info("Initializing MCP server...")
@@ -120,6 +132,15 @@ def main():
 
     # Create FastAPI app for admin panel
     admin_app = FastAPI(title="Context9 Admin API", version="0.1.0")
+
+    # Add CORS middleware to support cross-origin requests
+    admin_app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],  # In production, replace with specific origins
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
     # Setup admin API routes (must be before static files)
     admin_app.include_router(admin.router, prefix="/api/admin", tags=["admin"])

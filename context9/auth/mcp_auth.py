@@ -56,9 +56,10 @@ class APIKeyMiddleware(BaseHTTPMiddleware):
                 f"Authorization header value: {request.headers[auth_header_key][:50]}..."
             )  # Log first 50 chars for security
 
-        # Skip API key authentication for GitHub webhook endpoint
-        # GitHub webhooks use their own signature verification (X-Hub-Signature-256)
-        if request.url.path == "/api/github":
+        # Only validate API key for /api/mcp endpoint
+        # All other URLs are allowed without authentication
+        if request.url.path != "/api/mcp":
+            logger.info(f"Skipping API key validation for {request.url.path}")
             return await call_next(request)
 
         # If no API key is configured, reject the service

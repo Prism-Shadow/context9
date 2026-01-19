@@ -35,7 +35,7 @@ export const ApiKeyDetail: React.FC = () => {
       setSelectedRepoIds(apiKeyRes.repositories.map((r) => r.id));
     } catch (error) {
       console.error('Failed to load data:', error);
-      alert('加载失败');
+      alert('Failed to load');
     } finally {
       setLoading(false);
     }
@@ -54,21 +54,21 @@ export const ApiKeyDetail: React.FC = () => {
     try {
       setSaving(true);
       await updateApiKeyRepositories(Number(id), selectedRepoIds);
-      alert('权限更新成功');
+      alert('Permissions updated successfully');
       navigate('/api-keys');
     } catch (error: any) {
-      alert(error.response?.data?.detail || '更新失败');
+      alert(error.response?.data?.detail || 'Failed to update');
     } finally {
       setSaving(false);
     }
   };
 
   if (loading) {
-    return <div className="text-center py-8">加载中...</div>;
+    return <div className="text-center py-8">Loading...</div>;
   }
 
   if (!apiKey) {
-    return <div className="text-center py-8">API Key 不存在</div>;
+    return <div className="text-center py-8">API Key does not exist</div>;
   }
 
   return (
@@ -79,35 +79,35 @@ export const ApiKeyDetail: React.FC = () => {
             onClick={() => navigate('/api-keys')}
             className="text-sm text-gray-600 hover:text-gray-900 mb-2"
           >
-            ← 返回列表
+            ← Back to List
           </button>
           <h1 className="text-2xl font-bold text-gray-900">API Key: {apiKey.name}</h1>
         </div>
         <Button onClick={handleSave} disabled={saving}>
-          {saving ? '保存中...' : '保存权限'}
+          {saving ? 'Saving...' : 'Save Permissions'}
         </Button>
       </div>
 
       <div className="bg-white rounded-lg shadow p-6 mb-6">
-        <h2 className="text-lg font-medium text-gray-900 mb-4">基本信息</h2>
+        <h2 className="text-lg font-medium text-gray-900 mb-4">Basic Information</h2>
         <dl className="grid grid-cols-1 gap-4">
           <div>
-            <dt className="text-sm font-medium text-gray-500">名称</dt>
+            <dt className="text-sm font-medium text-gray-500">Name</dt>
             <dd className="mt-1 text-sm text-gray-900">{apiKey.name}</dd>
           </div>
           <div>
-            <dt className="text-sm font-medium text-gray-500">创建时间</dt>
+            <dt className="text-sm font-medium text-gray-500">Created At</dt>
             <dd className="mt-1 text-sm text-gray-900">
-              {new Date(apiKey.created_at).toLocaleString('zh-CN')}
+              {new Date(apiKey.created_at).toLocaleString('en-US')}
             </dd>
           </div>
         </dl>
       </div>
 
       <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-lg font-medium text-gray-900 mb-4">仓库权限</h2>
+        <h2 className="text-lg font-medium text-gray-900 mb-4">Repository Permissions</h2>
         <p className="text-sm text-gray-600 mb-4">
-          选择该 API Key 可以访问的仓库：
+          Select repositories that this API Key can access:
         </p>
         <div className="space-y-2">
           {allRepositories.map((repo) => (
@@ -133,7 +133,7 @@ export const ApiKeyDetail: React.FC = () => {
           ))}
           {allRepositories.length === 0 && (
             <p className="text-sm text-gray-500 text-center py-4">
-              暂无仓库，请先创建仓库
+              No repositories available, please create a repository first
             </p>
           )}
         </div>

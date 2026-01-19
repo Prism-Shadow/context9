@@ -110,3 +110,8 @@ export interface LoginResponse {
   token_type: string;
   admin: Admin;
 }
+
+export interface ChangePasswordRequest {
+  current_password: string;
+  new_password: string;
+}

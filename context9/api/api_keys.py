@@ -3,13 +3,14 @@
 import secrets
 import hashlib
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 
 from ..database import get_db
 from ..database.models import Admin, ApiKey, Repository, ApiKeyRepository
 from ..auth.admin_auth import get_current_admin
+from ..utils.datetime_utils import convert_to_client_timezone, get_client_timezone
 
 router = APIRouter()
 
@@ -71,10 +72,12 @@ def generate_api_key() -> tuple[str, str]:
 
 @router.get("", response_model=dict)
 def get_api_keys(
+    request: Request,
     admin: Admin = Depends(get_current_admin),
     db: Session = Depends(get_db),
 ):
     """Get all API keys."""
+    client_tz = get_client_timezone(request)
     api_keys = db.query(ApiKey).all()
     items = []
     for key in api_keys:
@@ -87,8 +90,8 @@ def get_api_keys(
             {
                 "id": key.id,
                 "name": key.name,
-                "created_at": key.created_at.isoformat(),
-                "updated_at": key.updated_at.isoformat() if key.updated_at else None,
+                "created_at": convert_to_client_timezone(key.created_at, client_tz),
+                "updated_at": convert_to_client_timezone(key.updated_at, client_tz),
                 "repository_count": repo_count,
             }
         )
@@ -100,10 +103,12 @@ def get_api_keys(
 )
 def create_api_key(
     request: CreateApiKeyRequest,
+    http_request: Request,
     admin: Admin = Depends(get_current_admin),
     db: Session = Depends(get_db),
 ):
     """Create a new API key."""
+    client_tz = get_client_timezone(http_request)
     key_value, key_hash = generate_api_key()
     api_key = ApiKey(
         name=request.name,
@@ -118,7 +123,7 @@ def create_api_key(
         id=api_key.id,
         name=api_key.name,
         key_value=key_value,  # Return only once
-        created_at=api_key.created_at.isoformat(),
+        created_at=convert_to_client_timezone(api_key.created_at, client_tz) or "",
     )
 
 
@@ -144,10 +149,12 @@ def delete_api_key(
 def update_api_key(
     key_id: int,
     request: UpdateApiKeyRequest,
+    http_request: Request,
     admin: Admin = Depends(get_current_admin),
     db: Session = Depends(get_db),
 ):
     """Update API key name."""
+    client_tz = get_client_timezone(http_request)
     api_key = db.query(ApiKey).filter(ApiKey.id == key_id).first()
     if not api_key:
         raise HTTPException(
@@ -163,8 +170,8 @@ def update_api_key(
     return ApiKeyResponse(
         id=api_key.id,
         name=api_key.name,
-        created_at=api_key.created_at.isoformat(),
-        updated_at=api_key.updated_at.isoformat() if api_key.updated_at else None,
+        created_at=convert_to_client_timezone(api_key.created_at, client_tz) or "",
+        updated_at=convert_to_client_timezone(api_key.updated_at, client_tz),
         repository_count=repo_count,
     )
 
@@ -172,10 +179,12 @@ def update_api_key(
 @router.get("/{key_id}", response_model=ApiKeyDetailResponse)
 def get_api_key_detail(
     key_id: int,
+    http_request: Request,
     admin: Admin = Depends(get_current_admin),
     db: Session = Depends(get_db),
 ):
     """Get API key detail with repositories."""
+    client_tz = get_client_timezone(http_request)
     api_key = db.query(ApiKey).filter(ApiKey.id == key_id).first()
     if not api_key:
         raise HTTPException(
@@ -201,8 +210,8 @@ def get_api_key_detail(
     return ApiKeyDetailResponse(
         id=api_key.id,
         name=api_key.name,
-        created_at=api_key.created_at.isoformat(),
-        updated_at=api_key.updated_at.isoformat() if api_key.updated_at else None,
+        created_at=convert_to_client_timezone(api_key.created_at, client_tz) or "",
+        updated_at=convert_to_client_timezone(api_key.updated_at, client_tz),
         repositories=repositories,
     )
 

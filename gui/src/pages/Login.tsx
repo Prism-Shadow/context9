@@ -19,8 +19,12 @@ export const Login: React.FC = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
-  } = useForm<LoginFormData>();
+    formState: { errors, isSubmitted, touchedFields },
+  } = useForm<LoginFormData>({
+    mode: 'onSubmit',
+    reValidateMode: 'onBlur',
+    shouldFocusError: false,
+  });
 
   const onSubmit = async (data: LoginFormData) => {
     setError('');
@@ -29,7 +33,7 @@ export const Login: React.FC = () => {
       await login(data.username, data.password);
       navigate('/dashboard');
     } catch (err: any) {
-      setError(err.response?.data?.detail || '登录失败，请检查用户名和密码');
+      setError(err.response?.data?.detail || 'Login failed, please check your username and password');
     } finally {
       setLoading(false);
     }
@@ -40,9 +44,9 @@ export const Login: React.FC = () => {
       <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-md">
         <div>
           <h2 className="text-center text-3xl font-extrabold text-gray-900">
-            Context9 管理后台
+            Context9 Admin Panel
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">管理员登录</p>
+          <p className="mt-2 text-center text-sm text-gray-600">Admin Login</p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
           {error && (
@@ -52,16 +56,16 @@ export const Login: React.FC = () => {
           )}
           <div className="space-y-4">
             <Input
-              label="用户名"
+              label="Username"
               type="text"
-              {...register('username', { required: '用户名是必填项' })}
-              error={errors.username?.message}
+              {...register('username', { required: 'Username is required' })}
+              error={isSubmitted || touchedFields.username ? errors.username?.message : undefined}
             />
             <Input
-              label="密码"
+              label="Password"
               type="password"
-              {...register('password', { required: '密码是必填项' })}
-              error={errors.password?.message}
+              {...register('password', { required: 'Password is required' })}
+              error={isSubmitted || touchedFields.password ? errors.password?.message : undefined}
             />
           </div>
           <div>
@@ -71,7 +75,7 @@ export const Login: React.FC = () => {
               className="w-full"
               disabled={loading}
             >
-              {loading ? '登录中...' : '登录'}
+              {loading ? 'Logging in...' : 'Login'}
             </Button>
           </div>
         </form>

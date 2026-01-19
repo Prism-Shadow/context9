@@ -50,7 +50,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }
                 onClick={onClose}
                 className="text-gray-400 hover:text-gray-500 focus:outline-none"
               >
-                <span className="sr-only">关闭</span>
+                <span className="sr-only">Close</span>
                 <svg
                   className="w-6 h-6"
                   fill="none"

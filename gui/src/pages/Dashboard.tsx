@@ -33,21 +33,21 @@ export const Dashboard: React.FC = () => {
   if (stats.loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">加载中...</div>
+        <div className="text-gray-500">Loading...</div>
       </div>
     );
   }
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">仪表盘</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-6">Dashboard</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-medium text-gray-700 mb-2">API Keys 总数</h2>
+          <h2 className="text-lg font-medium text-gray-700 mb-2">Total API Keys</h2>
           <p className="text-3xl font-bold text-primary-600">{stats.apiKeysCount}</p>
         </div>
         <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-medium text-gray-700 mb-2">仓库总数</h2>
+          <h2 className="text-lg font-medium text-gray-700 mb-2">Total Repositories</h2>
           <p className="text-3xl font-bold text-primary-600">{stats.repositoriesCount}</p>
         </div>
       </div>

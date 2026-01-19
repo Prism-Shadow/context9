@@ -1,5 +1,10 @@
 import api from './api';
-import type { LoginRequest, LoginResponse, Admin } from '../utils/types';
+import type {
+  LoginRequest,
+  LoginResponse,
+  Admin,
+  ChangePasswordRequest,
+} from '../utils/types';
 
 // 管理员登录
 export const login = async (data: LoginRequest): Promise<LoginResponse> => {
@@ -16,4 +21,15 @@ export const getCurrentAdmin = async (): Promise<Admin> => {
 // 登出
 export const logout = async (): Promise<void> => {
   await api.post('/api/admin/logout');
+};
+
+// 修改密码
+export const changePassword = async (
+  data: ChangePasswordRequest
+): Promise<{ message: string }> => {
+  const response = await api.post<{ message: string }>(
+    '/api/admin/change-password',
+    data
+  );
+  return response.data;
 };

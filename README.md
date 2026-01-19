@@ -1,6 +1,8 @@
 ![Cover](TODO)
 
-# Context9 - Secure Real-Time Docs for LLM & Code Agents
+# Context9 - Open Source, Real-Time MCP Doc Server for AI Agents
+
+Bring Living Documentation into Your AI Context — Securely, Locally, and Under Your Control
 
 [![Apache 2.0 licensed](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
@@ -20,24 +22,67 @@
 [![Arabic Documentation](https://img.shields.io/badge/docs-Arabic-black)](./docs/README.ar.md)
 [![Tiếng Việt](https://img.shields.io/badge/docs-Tiếng%20Việt-darkcyan)](./docs/README.vi.md)
 
-## About
+---
 
+## What makes Context9 unique
+
+<table>
+<tr>
+<td width="50%" valign="top" align="center">
 ### ❌ Without Context9
-
+<div align="left">
 - ❌ Relies on outdated code documentation and examples
 - ❌ Private team knowledge risks leakage through public MCP infrastructure
 - ❌ Constant document syncing introduces significant cost and friction
 - ❌ No access to private or internal documentation
+</div>
+</td>
 
+<td width="50%" valign="top" align="center">
 ### ✅ With Context9
-
+<div align="left">
 - ✅ Always operates on up-to-date code documentation and examples
 - ✅ Deployed within the team to keep documentation secure and private
 - ✅ Seamless document management designed for agile development, transparent to users
 - ✅ Unified access to live documentation across private and public sources
+</div>
+</td>
+</tr>
 
+<tr>
+<td width="50%" valign="top" align="center">
+### 🔒 It runs locally
+<div align="left">
+- Your code and docs never leave your infrastructure
+- Deployed inside your team’s network or on personal machines
+- No external dependency or cloud latency in the documentation loop
+</div>
+</td>
+
+<td width="50%" valign="top" align="center">
+### 🎯 It keeps agents focused
+<div align="left">
+- Light-weight, only relevant repositories are included in context
+- No global crawling or searching across massive codebases
+- Reduced context window size, fewer hallucinations
+</div>
+</td>
+</tr>
+</table>
+
+## What Context9 Actually Does
 
 🚀 **Context9 (Context Mine)** is an MCP (Model Context Protocol) server designed for modern development teams, enabling AI assistants and code agents to securely and timely access documentation while maintaining full privacy control.
+
+| 📚 Live Docs | 🔐 Local & Private | 🧠 Focused Context |
+|-------------|------------------|------------------|
+| Always reads the latest docs from real repos | Runs inside your own environment | Feeds agents only relevant information |
+| No stale examples | No public infrastructure | Less context, fewer hallucinations |
+
+| 🎯 Scoped Access | 🔌 MCP Native | 🛠 You’re in Control |
+|-----------------|--------------|------------------|
+| Only the repos you configure | Works out of the box with MCP agents | Approve access, see logs, stop anytime |
+| Private and public supported | No plugins or hacks | Your infra, your rules |
 
 Simply add `use context9` to your prompt, or let rules handle automatic invocation.
 
@@ -49,7 +94,7 @@ With Context9, inspect the newly added frontend APIs in the team, implement the 
 Deploy the latest version of the backend server following the documentation with Context9.
 ```
 
-Documentation Guide
+## How to use it
 
 - To deploy Context9 for your team or personal use, see [Deployment](#deployment).
 - If you already have a Context9 service running and want to connect it to Cursor or Claude Code, see [Integrate Context9 with Your Agent](#integrate-context9-with-your-agent).
@@ -181,15 +226,56 @@ claude mcp add --transport http Context9 <Context9_url>:8011/api/mcp/ --header "
 ```
 </details>
 
+## Work with Context9
 
 
-## Connect with Us
+<details>
+<summary><b>1. Set up entry documentation</b></summary>
+To enable Context9 to correctly discover and index your repository documentation, each repository should provide a Spec document.
+By default, Context9 expects a file named spec.md at the root of the repository.
+```text
+your-repo/
+├── spec.md          ← Specification entry point
+├── README.md
+├── docs/
+│   └── ...
+└── ...
+```
+> If you need to use a different filename or path, coordinate with the Context9 administrator to update the repository configuration.
 
-Stay updated and join our community:
+</details>
 
-- Follow us on [X](TODO) for the latest news and updates
-- Visit our [Website](TODO)
-- Join our [Discord](TODO)
+<details>
+<summary><b>2. Use relative link of other doc</b></summary>
+
+You do not need to think about MCP, indexing, or document resolution. Just maintain documentation links using normal repository-relative paths, exactly as you would for human readers.
+
+Example in documentation.
+
+```markdown
+## Related Documents
+- [Detailed Guide](docs/detailed-guide.md)
+- [API Reference](guides/api-reference.md)
+- [FAQ](faq.md)
+```
+
+As long as these links are valid within the repository, Context9 will:
+
+- Discover the documents
+- Index them correctly
+- Make them available to AI agents in real time
+
+</details>
+
+
+
+<br />
+
+<div align="center">
+
+**[Website](TODO)** · **[X](TODO)** · **[Discord](TODO)** · **[Issues](TODO)**
+
+</div>
 
 
 ## ⭐ Star History

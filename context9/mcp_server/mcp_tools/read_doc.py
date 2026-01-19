@@ -1,11 +1,8 @@
-from .github_client import GitHubClientError, GitHubFileNotFoundError
-from .url_parser import parse_remotedoc_url, URLParseError
+from ..github_client import GitHubClientError, GitHubFileNotFoundError
+from ..utils import parse_remotedoc_url, URLParseError
 
-from fastmcp import FastMCP
-
+from .mcp_instance import context9_mcp
 from loguru import logger
-
-context9_mcp = FastMCP("Context9")
 
 
 @context9_mcp.tool()
@@ -66,33 +63,3 @@ def read_doc(url: str) -> str:
         error_msg = f"Unexpected error while reading document: {e}"
         logger.error(error_msg, exc_info=True)
         raise ValueError(error_msg)
-
-
-@context9_mcp.tool()
-def get_doc_list() -> list[dict[str, str]]:
-    """
-    Read documentation list managed by Context9.
-
-    Context9 manages several repositories and their documentation files.
-    This tool allows you to get all avaiable repo_name, repo_description and repo_spec_path.
-    repo_name is the name of the repository.
-    repo_description is the description of the repository.
-    repo_spec_path is the path to the root specification file of the repository in the format of remotedoc://path/to/file.md.
-    After getting the list, you can use the read_doc tool to read the documentation file.
-
-    Args:
-        None
-
-    Returns:
-        A list of dictionaries, each dictionary containing the repo_name, repo_description and repo_spec_path
-
-    Raises:
-        ValueError: If the documentation list cannot be read
-        Exception: If an unexpected error occurs
-    """
-    from .mcp_server import github_client
-
-    if not github_client:
-        raise ValueError("Server not initialized. Please check configuration.")
-
-    return github_client.get_doc_list()

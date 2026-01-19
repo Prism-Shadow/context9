@@ -5,6 +5,7 @@ from .config import ConfigError
 import argparse
 import os
 from dotenv import load_dotenv
+from . import mcp_tools
 
 github_client = None
 api_key = None
@@ -48,4 +49,4 @@ def initialize_mcp_server(args: argparse.Namespace):
         logger.error(f"Failed to initialize server: {e}", exc_info=True)
         sys.exit(1)
 
-    return api_key, github_client
+    return api_key, github_client, mcp_tools.context9_mcp

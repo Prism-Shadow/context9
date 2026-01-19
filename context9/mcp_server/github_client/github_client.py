@@ -17,7 +17,7 @@ from starlette.responses import JSONResponse
 from starlette import status
 from starlette.requests import Request
 import random
-from .markdown_rewriter import rewrite_relative_paths
+from ..markdown import rewrite_relative_paths
 
 
 class GitHubClientError(Exception):

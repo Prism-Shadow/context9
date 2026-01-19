@@ -7,6 +7,8 @@ Uses local caching with periodic synchronization to reduce API calls.
 
 import subprocess
 import threading
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Optional, Dict, Any, List
 import requests
@@ -60,6 +62,7 @@ class GitHubClient:
         cache_dir: Optional[str] = None,
         sync_interval: int = 600,
         enable_github_webhook: bool = False,
+        max_workers: int = 5,
     ):
         """
         Initialize GitHub client.
@@ -72,11 +75,13 @@ class GitHubClient:
             cache_dir: Directory to cache repositories locally (default: ~/.github_cache)
             sync_interval: Interval in seconds to sync repository (default: 600 = 10 minutes)
             enable_github_webhook: Enable GitHub webhook (default: False)
+            max_workers: Maximum number of workers to use for parallel synchronization (default: 5)
         """
         self.token = token
         self.timeout = timeout
         self.sync_interval = sync_interval
         self.enable_github_webhook = enable_github_webhook
+        self.max_workers = max_workers
 
         if self.enable_github_webhook and self.sync_interval is not None:
             raise ValueError(
@@ -296,11 +301,42 @@ class GitHubClient:
 
     def _sync_repositories(self):
         """
-        Sync repositories from remote to local cache.
+        Sync repositories from remote to local cache in parallel.
         Uses git clone if repository doesn't exist, or git pull if it does.
+        Maximum concurrency is set to 5.
         """
-        for repo in self.repos:
-            self._sync_repository(repo)
+        start_time = time.time()
+        repo_count = len(self.repos)
+        logger.info(
+            f"Starting to sync {repo_count} repositories in parallel (max workers: 5)"
+        )
+
+        max_workers = self.max_workers
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            # Submit all sync tasks
+            future_to_repo = {
+                executor.submit(self._sync_repository, repo): repo
+                for repo in self.repos
+            }
+
+            # Wait for all tasks to complete and handle results
+            for future in as_completed(future_to_repo):
+                repo = future_to_repo[future]
+                try:
+                    future.result()
+                    logger.info(
+                        f"Successfully synced repository {repo['owner']}/{repo['repo']}"
+                    )
+                except Exception as e:
+                    logger.error(
+                        f"Error syncing repository {repo['owner']}/{repo['repo']}: {e}",
+                        exc_info=True,
+                    )
+
+        elapsed_time = time.time() - start_time
+        logger.info(
+            f"Completed syncing {repo_count} repositories in {elapsed_time:.2f} seconds"
+        )
 
     def _start_sync_timer(self):
         """

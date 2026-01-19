@@ -29,7 +29,7 @@ Bring Living Documentation into Your AI Context — Securely, Locally, and Under
 <table>
 <tr>
 <td width="50%" valign="top" align="center">
-### ❌ Without Context9
+<h3>❌ Without Context9</h3>
 <div align="left">
 - ❌ Relies on outdated code documentation and examples
 - ❌ Private team knowledge risks leakage through public MCP infrastructure
@@ -39,7 +39,7 @@ Bring Living Documentation into Your AI Context — Securely, Locally, and Under
 </td>
 
 <td width="50%" valign="top" align="center">
-### ✅ With Context9
+<h3>✅ With Context9</h3>
 <div align="left">
 - ✅ Always operates on up-to-date code documentation and examples
 - ✅ Deployed within the team to keep documentation secure and private
@@ -51,7 +51,7 @@ Bring Living Documentation into Your AI Context — Securely, Locally, and Under
 
 <tr>
 <td width="50%" valign="top" align="center">
-### 🔒 It runs locally
+<h3>🔒 It runs locally</h3>
 <div align="left">
 - Your code and docs never leave your infrastructure
 - Deployed inside your team’s network or on personal machines
@@ -60,7 +60,7 @@ Bring Living Documentation into Your AI Context — Securely, Locally, and Under
 </td>
 
 <td width="50%" valign="top" align="center">
-### 🎯 It keeps agents focused
+<h3>🎯 It keeps agents focused</h3>
 <div align="left">
 - Light-weight, only relevant repositories are included in context
 - No global crawling or searching across massive codebases
@@ -74,15 +74,56 @@ Bring Living Documentation into Your AI Context — Securely, Locally, and Under
 
 🚀 **Context9 (Context Mine)** is an MCP (Model Context Protocol) server designed for modern development teams, enabling AI assistants and code agents to securely and timely access documentation while maintaining full privacy control.
 
-| 📚 Live Docs | 🔐 Local & Private | 🧠 Focused Context |
-|-------------|------------------|------------------|
-| Always reads the latest docs from real repos | Runs inside your own environment | Feeds agents only relevant information |
-| No stale examples | No public infrastructure | Less context, fewer hallucinations |
+<table>
+  <tr>
+    <td width="33%" valign="top">
+      <h3>📚 Live Docs</h3>
+      <div>
+        <p>Always reads the latest docs from real repos</p>
+        <p>No stale examples</p>
+      </div>
+    </td>
+    <td width="33%" valign="top">
+      <h3>🔐 Local &amp; Private</h3>
+      <div>
+        <p>Runs inside your own environment</p>
+        <p>No public infrastructure</p>
+      </div>
+    </td>
+    <td width="33%" valign="top">
+      <h3>🧠 Focused Context</h3>
+      <div>
+        <p>Feeds agents only relevant information</p>
+        <p>Less context, fewer hallucinations</p>
+      </div>
+    </td>
+  </tr>
 
-| 🎯 Scoped Access | 🔌 MCP Native | 🛠 You’re in Control |
-|-----------------|--------------|------------------|
-| Only the repos you configure | Works out of the box with MCP agents | Approve access, see logs, stop anytime |
-| Private and public supported | No plugins or hacks | Your infra, your rules |
+  <tr>
+    <td width="33%" valign="top">
+      <h3>🎯 Scoped Access</h3>
+      <div>
+        <p>Only the repos you configure</p>
+        <p>Private and public supported</p>
+      </div>
+    </td>
+    <td width="33%" valign="top">
+      <h3>🔌 MCP Native</h3>
+      <div>
+        <p>Works out of the box with MCP agents</p>
+        <p>No plugins or hacks</p>
+      </div>
+    </td>
+    <td width="33%" valign="top">
+      <h3>🛠 You’re in Control</h3>
+      <div>
+        <p>Approve access, see logs, stop anytime</p>
+        <p>Your infra, your rules</p>
+      </div>
+    </td>
+  </tr>
+</table>
+
 
 Simply add `use context9` to your prompt, or let rules handle automatic invocation.
 

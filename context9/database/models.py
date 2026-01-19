@@ -3,9 +3,14 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import datetime, timezone
 
 Base = declarative_base()
+
+
+def utc_now():
+    """Get current UTC datetime for SQLAlchemy default."""
+    return datetime.now(timezone.utc)
 
 
 class Admin(Base):
@@ -16,8 +21,8 @@ class Admin(Base):
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True, nullable=False, index=True)
     password_hash = Column(String, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
 
     # Relationships
     api_keys = relationship("ApiKey", back_populates="creator")
@@ -34,8 +39,8 @@ class ApiKey(Base):
     key_value = Column(
         String, unique=True, nullable=False
     )  # Only for initial generation
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
     created_by = Column(Integer, ForeignKey("admins.id"), nullable=True)
 
     # Relationships
@@ -58,8 +63,8 @@ class Repository(Base):
     github_token_encrypted = Column(Text, nullable=True)
     github_token_created_at = Column(DateTime, nullable=True)
     github_token_updated_at = Column(DateTime, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
 
     # Relationships
     api_keys = relationship(
@@ -81,7 +86,7 @@ class ApiKeyRepository(Base):
     repository_id = Column(
         Integer, ForeignKey("repositories.id", ondelete="CASCADE"), nullable=False
     )
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
 
     # Relationships
     api_key = relationship("ApiKey", back_populates="repositories")

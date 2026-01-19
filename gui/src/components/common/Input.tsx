@@ -3,21 +3,25 @@ import React from 'react';
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
-  onChange?: (value: string) => void;
+  onValueChange?: (value: string) => void; // Use different name to avoid conflict with react-hook-form
 }
 
-export const Input: React.FC<InputProps> = ({
+export const Input = React.forwardRef<HTMLInputElement, InputProps>(({
   label,
   error,
-  onChange,
+  onValueChange,
   className = '',
+  onChange,
   ...props
-}) => {
+}, ref) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Call react-hook-form's onChange first (from register)
     if (onChange) {
-      onChange(e.target.value);
-    } else if (props.onChange) {
-      props.onChange(e);
+      onChange(e);
+    }
+    // If custom onValueChange is provided (for controlled components), call it with value
+    if (onValueChange) {
+      onValueChange(e.target.value);
     }
   };
 
@@ -30,6 +34,7 @@ export const Input: React.FC<InputProps> = ({
       )}
       <input
         {...props}
+        ref={ref}
         onChange={handleChange}
         className={`
           w-full px-3 py-2 border rounded-lg shadow-sm
@@ -43,4 +48,6 @@ export const Input: React.FC<InputProps> = ({
       )}
     </div>
   );
-};
+});
+
+Input.displayName = 'Input';

@@ -5,16 +5,17 @@ import { Dashboard } from './pages/Dashboard';
 import { ApiKeys } from './pages/ApiKeys';
 import { ApiKeyDetail } from './pages/ApiKeyDetail';
 import { Repositories } from './pages/Repositories';
+import { ChangePassword } from './pages/ChangePassword';
 import { Layout } from './components/layout/Layout';
 
-// 受保护的路由组件
+// Protected route component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-gray-500">加载中...</div>
+        <div className="text-gray-500">Loading...</div>
       </div>
     );
   }
@@ -60,6 +61,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Repositories />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/change-password"
+          element={
+            <ProtectedRoute>
+              <ChangePassword />
             </ProtectedRoute>
           }
         />

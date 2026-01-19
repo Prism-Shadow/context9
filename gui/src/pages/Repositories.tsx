@@ -97,7 +97,7 @@ export const Repositories: React.FC = () => {
       setIsCreateModalOpen(false);
       await loadRepositories();
     } catch (error: any) {
-      alert(error.response?.data?.detail || '创建失败');
+      alert(error.response?.data?.detail || 'Failed to create');
     }
   };
 
@@ -131,17 +131,17 @@ export const Repositories: React.FC = () => {
       setEditingRepo(null);
       await loadRepositories();
     } catch (error: any) {
-      alert(error.response?.data?.detail || '更新失败');
+      alert(error.response?.data?.detail || 'Failed to update');
     }
   };
 
   const handleDelete = async (repo: Repository) => {
-    if (!confirm(`确定要删除仓库 "${repo.owner}/${repo.repo}" 吗？`)) return;
+    if (!confirm(`Are you sure you want to delete repository "${repo.owner}/${repo.repo}"?`)) return;
     try {
       await deleteRepository(repo.id);
       await loadRepositories();
     } catch (error: any) {
-      alert(error.response?.data?.detail || '删除失败');
+      alert(error.response?.data?.detail || 'Failed to delete');
     }
   };
 
@@ -164,20 +164,20 @@ export const Repositories: React.FC = () => {
       setVerifyResult(null);
       await loadRepositories();
     } catch (error: any) {
-      alert(error.response?.data?.detail || '设置失败');
+      alert(error.response?.data?.detail || 'Failed to set');
     }
   };
 
   const handleDeleteToken = async () => {
     if (!tokenRepo) return;
-    if (!confirm('确定要删除 GitHub Token 吗？')) return;
+    if (!confirm('Are you sure you want to delete the GitHub Token?')) return;
     try {
       await deleteGithubToken(tokenRepo.id);
       setIsTokenModalOpen(false);
       setTokenRepo(null);
       await loadRepositories();
     } catch (error: any) {
-      alert(error.response?.data?.detail || '删除失败');
+      alert(error.response?.data?.detail || 'Failed to delete');
     }
   };
 
@@ -189,7 +189,7 @@ export const Repositories: React.FC = () => {
     } catch (error: any) {
       setVerifyResult({
         valid: false,
-        error: error.response?.data?.detail || '验证失败',
+        error: error.response?.data?.detail || 'Verification failed',
       });
     }
   };
@@ -202,24 +202,24 @@ export const Repositories: React.FC = () => {
     {
       key: 'has_github_token',
       header: 'GitHub Token',
-      render: (item) => (item.has_github_token ? '已配置' : '未配置'),
+      render: (item) => (item.has_github_token ? 'Configured' : 'Not Configured'),
     },
     {
       key: 'created_at',
-      header: '创建时间',
+      header: 'Created At',
       render: (item) => formatDate(item.created_at),
     },
   ];
 
   if (loading) {
-    return <div className="text-center py-8">加载中...</div>;
+    return <div className="text-center py-8">Loading...</div>;
   }
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">仓库管理</h1>
-        <Button onClick={() => setIsCreateModalOpen(true)}>创建仓库</Button>
+        <h1 className="text-2xl font-bold text-gray-900">Repository Management</h1>
+        <Button onClick={() => setIsCreateModalOpen(true)}>Create Repository</Button>
       </div>
 
       {showNewToken && newToken && (
@@ -227,7 +227,7 @@ export const Repositories: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-yellow-800 mb-1">
-                GitHub Token 已设置，请妥善保存（仅显示一次）：
+                GitHub Token has been set, please save it securely (shown only once):
               </p>
               <code className="text-sm text-yellow-900 bg-yellow-100 px-2 py-1 rounded">
                 {newToken}
@@ -239,10 +239,10 @@ export const Repositories: React.FC = () => {
                 variant="secondary"
                 onClick={() => {
                   copyToClipboard(newToken);
-                  alert('已复制到剪贴板');
+                  alert('Copied to clipboard');
                 }}
               >
-                复制
+                Copy
               </Button>
               <Button
                 size="sm"
@@ -252,7 +252,7 @@ export const Repositories: React.FC = () => {
                   setNewToken('');
                 }}
               >
-                关闭
+                Close
               </Button>
             </div>
           </div>
@@ -269,7 +269,7 @@ export const Repositories: React.FC = () => {
             onClick={() => handleManageToken(item)}
             className="text-primary-600 hover:text-primary-900"
           >
-            管理 Token
+            Manage Token
           </button>
         )}
       />
@@ -277,22 +277,22 @@ export const Repositories: React.FC = () => {
       <Modal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
-        title="创建仓库"
+        title="Create Repository"
       >
         <form onSubmit={handleSubmitCreate(handleCreate)} className="space-y-4">
           <Input
             label="Owner"
-            {...registerCreate('owner', { required: 'Owner 是必填项' })}
+            {...registerCreate('owner', { required: 'Owner is required' })}
             error={errorsCreate.owner?.message}
           />
           <Input
             label="Repo"
-            {...registerCreate('repo', { required: 'Repo 是必填项' })}
+            {...registerCreate('repo', { required: 'Repo is required' })}
             error={errorsCreate.repo?.message}
           />
           <Input
             label="Branch"
-            {...registerCreate('branch', { required: 'Branch 是必填项' })}
+            {...registerCreate('branch', { required: 'Branch is required' })}
             error={errorsCreate.branch?.message}
           />
           <Input
@@ -302,7 +302,7 @@ export const Repositories: React.FC = () => {
             error={errorsCreate.root_spec_path?.message}
           />
           <Input
-            label="GitHub Token (可选)"
+            label="GitHub Token (Optional)"
             type={showToken ? 'text' : 'password'}
             {...registerCreate('github_token')}
             placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
@@ -314,7 +314,7 @@ export const Repositories: React.FC = () => {
               onClick={() => setShowToken(!showToken)}
               className="text-sm text-gray-600 hover:text-gray-800"
             >
-              {showToken ? '隐藏' : '显示'} Token
+              {showToken ? 'Hide' : 'Show'} Token
             </button>
           </div>
           <div className="flex gap-2 justify-end">
@@ -323,10 +323,10 @@ export const Repositories: React.FC = () => {
               variant="secondary"
               onClick={() => setIsCreateModalOpen(false)}
             >
-              取消
+              Cancel
             </Button>
             <Button type="submit" variant="primary">
-              创建
+              Create
             </Button>
           </div>
         </form>
@@ -338,22 +338,22 @@ export const Repositories: React.FC = () => {
           setIsEditModalOpen(false);
           setEditingRepo(null);
         }}
-        title="编辑仓库"
+        title="Edit Repository"
       >
         <form onSubmit={handleSubmitEdit(handleUpdate)} className="space-y-4">
           <Input
             label="Owner"
-            {...registerEdit('owner', { required: 'Owner 是必填项' })}
+            {...registerEdit('owner', { required: 'Owner is required' })}
             error={errorsEdit.owner?.message}
           />
           <Input
             label="Repo"
-            {...registerEdit('repo', { required: 'Repo 是必填项' })}
+            {...registerEdit('repo', { required: 'Repo is required' })}
             error={errorsEdit.repo?.message}
           />
           <Input
             label="Branch"
-            {...registerEdit('branch', { required: 'Branch 是必填项' })}
+            {...registerEdit('branch', { required: 'Branch is required' })}
             error={errorsEdit.branch?.message}
           />
           <Input
@@ -362,7 +362,7 @@ export const Repositories: React.FC = () => {
             error={errorsEdit.root_spec_path?.message}
           />
           <Input
-            label="GitHub Token (可选，留空不更新)"
+            label="GitHub Token (Optional, leave empty to not update)"
             type={showToken ? 'text' : 'password'}
             {...registerEdit('github_token')}
             placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
@@ -374,7 +374,7 @@ export const Repositories: React.FC = () => {
               onClick={() => setShowToken(!showToken)}
               className="text-sm text-gray-600 hover:text-gray-800"
             >
-              {showToken ? '隐藏' : '显示'} Token
+              {showToken ? 'Hide' : 'Show'} Token
             </button>
           </div>
           <div className="flex gap-2 justify-end">
@@ -386,10 +386,10 @@ export const Repositories: React.FC = () => {
                 setEditingRepo(null);
               }}
             >
-              取消
+              Cancel
             </Button>
             <Button type="submit" variant="primary">
-              保存
+              Save
             </Button>
           </div>
         </form>
@@ -402,14 +402,14 @@ export const Repositories: React.FC = () => {
           setTokenRepo(null);
           setVerifyResult(null);
         }}
-        title={`管理 GitHub Token - ${tokenRepo?.owner}/${tokenRepo?.repo}`}
+        title={`Manage GitHub Token - ${tokenRepo?.owner}/${tokenRepo?.repo}`}
       >
         <form onSubmit={handleSubmitToken(handleSetToken)} className="space-y-4">
           <Input
             label="GitHub Token"
             type={showToken ? 'text' : 'password'}
             {...registerToken('github_token', {
-              required: tokenRepo?.has_github_token ? false : 'GitHub Token 是必填项',
+              required: tokenRepo?.has_github_token ? false : 'GitHub Token is required',
             })}
             placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
             error={errorsToken.github_token?.message}
@@ -420,7 +420,7 @@ export const Repositories: React.FC = () => {
               onClick={() => setShowToken(!showToken)}
               className="text-sm text-gray-600 hover:text-gray-800"
             >
-              {showToken ? '隐藏' : '显示'} Token
+              {showToken ? 'Hide' : 'Show'} Token
             </button>
             {tokenRepo?.has_github_token && (
               <>
@@ -430,7 +430,7 @@ export const Repositories: React.FC = () => {
                   size="sm"
                   onClick={handleVerifyToken}
                 >
-                  验证 Token
+                  Verify Token
                 </Button>
                 <Button
                   type="button"
@@ -438,7 +438,7 @@ export const Repositories: React.FC = () => {
                   size="sm"
                   onClick={handleDeleteToken}
                 >
-                  删除 Token
+                  Delete Token
                 </Button>
               </>
             )}
@@ -453,20 +453,20 @@ export const Repositories: React.FC = () => {
             >
               {verifyResult.valid ? (
                 <div>
-                  <p>✓ Token 有效</p>
+                  <p>✓ Token is valid</p>
                   {verifyResult.scopes && (
                     <p className="text-xs mt-1">
-                      权限范围: {verifyResult.scopes.join(', ')}
+                      Scopes: {verifyResult.scopes.join(', ')}
                     </p>
                   )}
                   {verifyResult.rate_limit_remaining !== undefined && (
                     <p className="text-xs mt-1">
-                      剩余请求数: {verifyResult.rate_limit_remaining}
+                      Remaining requests: {verifyResult.rate_limit_remaining}
                     </p>
                   )}
                 </div>
               ) : (
-                <p>✗ Token 无效: {verifyResult.error}</p>
+                <p>✗ Token is invalid: {verifyResult.error}</p>
               )}
             </div>
           )}
@@ -480,10 +480,10 @@ export const Repositories: React.FC = () => {
                 setVerifyResult(null);
               }}
             >
-              关闭
+              Close
             </Button>
             <Button type="submit" variant="primary">
-              {tokenRepo?.has_github_token ? '更新 Token' : '设置 Token'}
+              {tokenRepo?.has_github_token ? 'Update Token' : 'Set Token'}
             </Button>
           </div>
         </form>

@@ -67,7 +67,7 @@ export const ApiKeys: React.FC = () => {
       setIsCreateModalOpen(false);
       await loadApiKeys();
     } catch (error: any) {
-      alert(error.response?.data?.detail || '创建失败');
+      alert(error.response?.data?.detail || 'Failed to create');
     }
   };
 
@@ -85,17 +85,17 @@ export const ApiKeys: React.FC = () => {
       setEditingKey(null);
       await loadApiKeys();
     } catch (error: any) {
-      alert(error.response?.data?.detail || '更新失败');
+      alert(error.response?.data?.detail || 'Failed to update');
     }
   };
 
   const handleDelete = async (key: ApiKey) => {
-    if (!confirm(`确定要删除 API Key "${key.name}" 吗？`)) return;
+    if (!confirm(`Are you sure you want to delete API Key "${key.name}"?`)) return;
     try {
       await deleteApiKey(key.id);
       await loadApiKeys();
     } catch (error: any) {
-      alert(error.response?.data?.detail || '删除失败');
+      alert(error.response?.data?.detail || 'Failed to delete');
     }
   };
 
@@ -104,28 +104,28 @@ export const ApiKeys: React.FC = () => {
   };
 
   const columns: Column<ApiKey>[] = [
-    { key: 'name', header: '名称' },
+    { key: 'name', header: 'Name' },
     {
       key: 'created_at',
-      header: '创建时间',
+      header: 'Created At',
       render: (item) => formatDate(item.created_at),
     },
     {
       key: 'repository_count',
-      header: '关联仓库数',
+      header: 'Repositories',
       render: (item) => item.repository_count || 0,
     },
   ];
 
   if (loading) {
-    return <div className="text-center py-8">加载中...</div>;
+    return <div className="text-center py-8">Loading...</div>;
   }
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">API Keys 管理</h1>
-        <Button onClick={() => setIsCreateModalOpen(true)}>创建 API Key</Button>
+        <h1 className="text-2xl font-bold text-gray-900">API Keys Management</h1>
+        <Button onClick={() => setIsCreateModalOpen(true)}>Create API Key</Button>
       </div>
 
       {showNewKey && newKey && (
@@ -133,7 +133,7 @@ export const ApiKeys: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-yellow-800 mb-1">
-                新 API Key 已创建，请妥善保存（仅显示一次）：
+                New API Key created, please save it securely (shown only once):
               </p>
               <code className="text-sm text-yellow-900 bg-yellow-100 px-2 py-1 rounded">
                 {newKey}
@@ -145,10 +145,10 @@ export const ApiKeys: React.FC = () => {
                 variant="secondary"
                 onClick={() => {
                   copyToClipboard(newKey);
-                  alert('已复制到剪贴板');
+                  alert('Copied to clipboard');
                 }}
               >
-                复制
+                Copy
               </Button>
               <Button
                 size="sm"
@@ -158,7 +158,7 @@ export const ApiKeys: React.FC = () => {
                   setNewKey('');
                 }}
               >
-                关闭
+                Close
               </Button>
             </div>
           </div>
@@ -175,7 +175,7 @@ export const ApiKeys: React.FC = () => {
             onClick={() => handleManagePermissions(item)}
             className="text-primary-600 hover:text-primary-900"
           >
-            管理权限
+            Manage Permissions
           </button>
         )}
       />
@@ -183,12 +183,12 @@ export const ApiKeys: React.FC = () => {
       <Modal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
-        title="创建 API Key"
+        title="Create API Key"
       >
         <form onSubmit={handleSubmitCreate(handleCreate)} className="space-y-4">
           <Input
-            label="名称"
-            {...registerCreate('name', { required: '名称是必填项' })}
+            label="Name"
+            {...registerCreate('name', { required: 'Name is required' })}
             error={errorsCreate.name?.message}
           />
           <div className="flex gap-2 justify-end">
@@ -197,10 +197,10 @@ export const ApiKeys: React.FC = () => {
               variant="secondary"
               onClick={() => setIsCreateModalOpen(false)}
             >
-              取消
+              Cancel
             </Button>
             <Button type="submit" variant="primary">
-              创建
+              Create
             </Button>
           </div>
         </form>
@@ -212,12 +212,12 @@ export const ApiKeys: React.FC = () => {
           setIsEditModalOpen(false);
           setEditingKey(null);
         }}
-        title="编辑 API Key"
+        title="Edit API Key"
       >
         <form onSubmit={handleSubmitEdit(handleUpdate)} className="space-y-4">
           <Input
-            label="名称"
-            {...registerEdit('name', { required: '名称是必填项' })}
+            label="Name"
+            {...registerEdit('name', { required: 'Name is required' })}
             error={errorsEdit.name?.message}
           />
           <div className="flex gap-2 justify-end">
@@ -229,10 +229,10 @@ export const ApiKeys: React.FC = () => {
                 setEditingKey(null);
               }}
             >
-              取消
+              Cancel
             </Button>
             <Button type="submit" variant="primary">
-              保存
+              Save
             </Button>
           </div>
         </form>

@@ -36,7 +36,7 @@ export function Table<T extends { id: number }>({
             ))}
             {(onEdit || onDelete || actions) && (
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                操作
+                Actions
               </th>
             )}
           </tr>
@@ -48,7 +48,7 @@ export function Table<T extends { id: number }>({
                 colSpan={columns.length + (onEdit || onDelete || actions ? 1 : 0)}
                 className="px-6 py-4 text-center text-sm text-gray-500"
               >
-                暂无数据
+                No data available
               </td>
             </tr>
           ) : (
@@ -68,7 +68,7 @@ export function Table<T extends { id: number }>({
                           onClick={() => onEdit(item)}
                           className="text-primary-600 hover:text-primary-900"
                         >
-                          编辑
+                          Edit
                         </button>
                       )}
                       {onDelete && (
@@ -76,7 +76,7 @@ export function Table<T extends { id: number }>({
                           onClick={() => onDelete(item)}
                           className="text-red-600 hover:text-red-900"
                         >
-                          删除
+                          Delete
                         </button>
                       )}
                     </div>

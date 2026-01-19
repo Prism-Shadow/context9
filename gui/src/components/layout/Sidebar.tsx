@@ -3,9 +3,9 @@ import { NavLink } from 'react-router-dom';
 
 export const Sidebar: React.FC = () => {
   const navItems = [
-    { path: '/dashboard', label: '仪表盘' },
+    { path: '/dashboard', label: 'Dashboard' },
     { path: '/api-keys', label: 'API Keys' },
-    { path: '/repositories', label: '仓库管理' },
+    { path: '/repositories', label: 'Repositories' },
   ];
 
   return (

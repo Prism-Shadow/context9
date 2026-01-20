@@ -4,12 +4,14 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
   onValueChange?: (value: string) => void; // Use different name to avoid conflict with react-hook-form
+  endAdornment?: React.ReactNode;
 }
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(({
   label,
   error,
   onValueChange,
+  endAdornment,
   className = '',
   onChange,
   ...props
@@ -32,17 +34,25 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(({
           {label}
         </label>
       )}
-      <input
-        {...props}
-        ref={ref}
-        onChange={handleChange}
-        className={`
-          w-full px-3 py-2 border rounded-lg shadow-sm
-          focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500
-          ${error ? 'border-red-500' : 'border-gray-300'}
-          ${className}
-        `}
-      />
+      <div className="relative">
+        <input
+          {...props}
+          ref={ref}
+          onChange={handleChange}
+          className={`
+            w-full px-3 py-2 border rounded-lg shadow-sm
+            focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500
+            ${error ? 'border-red-500' : 'border-gray-300'}
+            ${endAdornment ? 'pr-10' : ''}
+            ${className}
+          `}
+        />
+        {endAdornment && (
+          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center">
+            {endAdornment}
+          </div>
+        )}
+      </div>
       {error && (
         <p className="mt-1 text-sm text-red-600">{error}</p>
       )}

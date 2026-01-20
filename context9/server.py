@@ -134,8 +134,6 @@ def main():
     github_client.sync_database()
 
     # Create the MCP server as a Starlette app.
-    # path 必须是「挂载到子应用后」子应用看到的路径：Mount("/api/mcp", ...) 会去掉 /api/mcp，
-    # 所以 /api/mcp/ 在子应用里是 /，这里应填 "/" 而不能填 "/api/mcp/"。
     mcp_app = context9_mcp.http_app(path="/")
 
     # Create FastAPI app for admin panel
@@ -174,8 +172,6 @@ def main():
         )
 
     # Create main app that combines both.
-    # 必须传入 lifespan=mcp_app.lifespan，否则 FastMCP 的 StreamableHTTPSessionManager
-    # 的 task group 未初始化，会报 "Task group is not initialized. Make sure to use run()."
     app = Starlette(
         routes=[
             Mount("/api/mcp", app=mcp_app),

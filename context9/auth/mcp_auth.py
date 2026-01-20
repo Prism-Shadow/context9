@@ -1,9 +1,13 @@
-from typing import Optional, Callable
+import hashlib
+from typing import Callable
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request as StarletteRequest
 from starlette.responses import Response, JSONResponse
 from starlette import status
 from loguru import logger
+
+from ..database import SessionLocal
+from ..database.models import ApiKey
 
 
 class APIKeyMiddleware(BaseHTTPMiddleware):
@@ -14,26 +18,20 @@ class APIKeyMiddleware(BaseHTTPMiddleware):
     - HTTP Header: Authorization header (Bearer token), case-insensitive
     """
 
-    def __init__(self, app, api_key: Optional[str] = None):
+    def __init__(self, app):
         """
         Initialize the API key middleware.
 
         Args:
             app: The ASGI application
-            api_key: The API key to validate against. If None, authentication is disabled.
         """
         super().__init__(app)
-        # Store reference to module to get latest api_key value
-        self.api_key = api_key
-        logger.info(
-            f"API key middleware initialized with provided api_key: {api_key[:10] if api_key and len(api_key) > 10 else (api_key if api_key else 'None')}"
-        )
 
     async def dispatch(
         self, request: StarletteRequest, call_next: Callable
     ) -> Response:
         """
-        Process the request and validate API key if configured.
+        Process the request and validate API key.
 
         Args:
             request: The incoming request
@@ -55,22 +53,6 @@ class APIKeyMiddleware(BaseHTTPMiddleware):
             logger.info(
                 f"Authorization header value: {request.headers[auth_header_key][:50]}..."
             )  # Log first 50 chars for security
-
-        # Only validate API key for /api/mcp endpoint
-        # All other URLs are allowed without authentication
-        if request.url.path != "/api/mcp":
-            logger.info(f"Skipping API key validation for {request.url.path}")
-            return await call_next(request)
-
-        # If no API key is configured, reject the service
-        if not self.api_key:
-            logger.warning("API key is not configured, rejecting service")
-            return JSONResponse(
-                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                content={
-                    "detail": "Service is not available. API key is not configured."
-                },
-            )
 
         # Log client IP and target address
         client_ip = request.client.host if request.client else "unknown"
@@ -121,13 +103,24 @@ class APIKeyMiddleware(BaseHTTPMiddleware):
                 },
             )
 
-        if api_key_value != self.api_key:
-            logger.warning(f"Invalid API key provided in request to {request.url.path}")
-            return JSONResponse(
-                status_code=status.HTTP_403_FORBIDDEN,
-                content={"detail": "Invalid API key."},
+        # Verify API key against database (compare with stored key_hash)
+        key_hash = hashlib.sha256(api_key_value.encode()).hexdigest()
+        db = SessionLocal()
+        try:
+            api_key_record = (
+                db.query(ApiKey).filter(ApiKey.key_hash == key_hash).first()
             )
+            if not api_key_record:
+                logger.warning(
+                    f"Invalid API key provided in request to {request.url.path}"
+                )
+                return JSONResponse(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    content={"detail": "Invalid API key."},
+                )
+        finally:
+            db.close()
 
-        # API key is valid, proceed with the request
+        # API key exists in database, proceed with the request
         logger.info(f"API key validated successfully for {request.url.path}")
         return await call_next(request)

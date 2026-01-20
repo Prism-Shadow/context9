@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { ThemeToggle } from '../common/ThemeToggle';
 
 export const Header: React.FC = () => {
   const { user, logout } = useAuth();
@@ -36,17 +37,18 @@ export const Header: React.FC = () => {
   };
 
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200">
+    <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
       <div className="px-6 py-4 flex items-center justify-between">
         <div className="flex items-center">
-          <h1 className="text-xl font-bold text-gray-900">Context9 Panel</h1>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white">Context9 Panel</h1>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
           {user && (
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="flex items-center gap-2 text-sm text-gray-700 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded-lg px-3 py-2"
+                className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 rounded-lg px-3 py-2"
               >
                 <span className="font-medium">{user.username}</span>
                 <svg
@@ -66,16 +68,16 @@ export const Header: React.FC = () => {
                 </svg>
               </button>
               {isDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50">
                   <button
                     onClick={handleChangePassword}
-                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                   >
                     Change Password
                   </button>
                   <button
                     onClick={handleLogout}
-                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                   >
                     Logout
                   </button>

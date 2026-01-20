@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/common/Button';
 import { Input } from '../components/common/Input';
+import { ThemeToggle } from '../components/common/ThemeToggle';
 
 interface LoginFormData {
   username: string;
@@ -55,17 +56,18 @@ export const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 via-primary-50/80 to-primary-100/60">
-      <div className="max-w-md w-full space-y-8 p-10 bg-white/95 backdrop-blur rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 via-primary-50/80 to-primary-100/60 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 relative">
+      <ThemeToggle className="absolute top-4 right-4 z-10" />
+      <div className="max-w-md w-full space-y-8 p-10 bg-white/95 dark:bg-gray-800/95 backdrop-blur rounded-2xl shadow-xl shadow-gray-200/50 dark:shadow-black/20 border border-gray-100 dark:border-gray-700">
         <div>
-          <h2 className="text-center text-3xl font-extrabold text-gray-900 tracking-tight">
+          <h2 className="text-center text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
             Context9 Panel
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-500">Admin Login</p>
+          <p className="mt-2 text-center text-sm text-gray-500 dark:text-gray-400">Admin Login</p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+            <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded">
               {error}
             </div>
           )}
@@ -85,7 +87,7 @@ export const Login: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
-                  className="p-1 rounded text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-0 transition-colors"
+                  className="p-1 rounded text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-0 transition-colors"
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                   tabIndex={-1}
                 >
@@ -110,7 +112,7 @@ export const Login: React.FC = () => {
             href="https://github.com/Prism-Shadow/context9"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-gray-500 hover:text-gray-700 transition-colors"
+            className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
             aria-label="GitHub"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">

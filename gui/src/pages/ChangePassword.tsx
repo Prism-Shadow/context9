@@ -49,16 +49,16 @@ export const ChangePassword: React.FC = () => {
 
   return (
     <div className="min-h-[calc(100vh-7rem)] flex flex-col items-center justify-center">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Change Password</h1>
-      <div className="bg-white rounded-lg shadow p-6 max-w-md w-full">
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Change Password</h1>
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-none border border-transparent dark:border-gray-700 p-6 max-w-md w-full">
         <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+            <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded">
               {error}
             </div>
           )}
           {success && (
-            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
+            <div className="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 px-4 py-3 rounded">
               {success}
             </div>
           )}

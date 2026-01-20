@@ -14,10 +14,11 @@ export const Sidebar: React.FC = () => {
     { path: '/dashboard', label: 'Dashboard' },
     { path: '/api-keys', label: 'API Keys' },
     { path: '/repositories', label: 'Repositories' },
+    { path: '/inspector', label: 'MCP Inspector' },
   ];
 
   return (
-    <aside className="w-64 flex-shrink-0 self-start bg-white dark:bg-gray-800 shadow-sm border-r border-gray-200 dark:border-gray-700 h-[calc(100vh-4rem)] flex flex-col">
+    <aside className="fixed left-0 top-16 z-10 w-64 h-[calc(100vh-4rem)] flex flex-col bg-white dark:bg-gray-800 shadow-sm border-r border-gray-200 dark:border-gray-700">
       <nav className="p-4 flex-1 min-h-0 overflow-y-auto">
         <ul className="space-y-2">
           {navItems.map((item) => (

@@ -21,6 +21,8 @@ from starlette import status
 from starlette.requests import Request
 import random
 from ..markdown import rewrite_relative_paths
+from ...database.database import SessionLocal
+from ...database.models import Repository
 
 
 class GitHubClientError(Exception):
@@ -96,12 +98,7 @@ class GitHubClient:
             self.cache_dir = Path(cache_dir)
         self.cache_dir.mkdir(parents=True, exist_ok=True)
 
-        logger.info(f"repos: {repos}")
-        self.repos = repos
-        for repo in self.repos:
-            repo["sync_timer"] = None
-            repo["is_syncing"] = False
-            repo["sync_lock"] = ReadWriteLock()
+        self.repos = []
 
         # Create session with retry strategy (still needed for initial clone)
         self.session = requests.Session()
@@ -122,6 +119,44 @@ class GitHubClient:
         }
         if self.token:
             self.headers["Authorization"] = f"token {self.token}"
+
+    def sync_database(self):
+        # Load repositories from database instead of using repos parameter
+        # Note: repos parameter is kept for backward compatibility but not used
+        logger.warning(
+            "repos parameter is provided but will be ignored. Repositories will be loaded from database."
+        )
+
+        # Load repositories from database
+        db = SessionLocal()
+        try:
+            db_repos = db.query(Repository).all()
+            self.repos = []
+            for db_repo in db_repos:
+                repo_dict = {
+                    "owner": db_repo.owner,
+                    "repo": db_repo.repo,
+                    "branch": db_repo.branch,
+                    "root_spec_path": db_repo.root_spec_path or "spec.md",
+                    "sync_timer": None,
+                    "is_syncing": False,
+                    "sync_lock": ReadWriteLock(),
+                    "desc": None,
+                }
+                self.repos.append(repo_dict)
+            logger.info(f"Loaded {len(self.repos)} repositories from database")
+            if self.repos:
+                logger.debug(
+                    f"Repositories: {[(r['owner'], r['repo'], r['branch']) for r in self.repos]}"
+                )
+        except Exception as e:
+            logger.error(
+                f"Failed to load repositories from database: {e}", exc_info=True
+            )
+            # Fallback to empty list if database read fails
+            self.repos = []
+        finally:
+            db.close()
 
         # Initial sync (non-blocking, will retry in background if fails)
         logger.info(f"Initializing local cache at: {self.cache_dir}")
@@ -387,6 +422,217 @@ class GitHubClient:
                 logger.info(
                     f"Stopped periodic sync timer for repository {repo['owner']}/{repo['repo']}"
                 )
+
+    def add_repository(
+        self, owner: str, repo: str, branch: str, root_spec_path: str = "spec.md"
+    ):
+        """
+        Add a new repository to the client and start syncing it.
+
+        Args:
+            owner: Repository owner
+            repo: Repository name
+            branch: Branch name
+            root_spec_path: Root spec path (default: "spec.md")
+        """
+        # Check if repository already exists
+        for existing_repo in self.repos:
+            if (
+                existing_repo["owner"] == owner
+                and existing_repo["repo"] == repo
+                and existing_repo["branch"] == branch
+            ):
+                logger.warning(
+                    f"Repository {owner}/{repo}/{branch} already exists, updating instead"
+                )
+                self.update_repository(owner, repo, branch, root_spec_path)
+                return
+
+        # Create new repository dict
+        new_repo = {
+            "owner": owner,
+            "repo": repo,
+            "branch": branch,
+            "root_spec_path": root_spec_path,
+            "sync_timer": None,
+            "is_syncing": False,
+            "sync_lock": ReadWriteLock(),
+            "desc": None,
+        }
+
+        # Add to repos list
+        self.repos.append(new_repo)
+
+        # Sync the repository
+        try:
+            self._sync_repository(new_repo)
+            logger.info(f"Successfully added repository {owner}/{repo}/{branch}")
+        except Exception as e:
+            logger.error(
+                f"Failed to sync newly added repository {owner}/{repo}/{branch}: {e}"
+            )
+
+        # Start sync timer if enabled
+        if self.sync_interval is not None:
+            self._start_sync_timer_for_repo(new_repo)
+
+    def update_repository(
+        self,
+        owner: str,
+        repo: str,
+        branch: str,
+        new_owner: Optional[str] = None,
+        new_repo: Optional[str] = None,
+        new_branch: Optional[str] = None,
+        new_root_spec_path: Optional[str] = None,
+    ):
+        """
+        Update an existing repository configuration.
+
+        Args:
+            owner: Current repository owner
+            repo: Current repository name
+            branch: Current branch name
+            new_owner: New owner (optional)
+            new_repo: New repository name (optional)
+            new_branch: New branch name (optional)
+            new_root_spec_path: New root spec path (optional)
+        """
+        # Find the repository
+        repo_dict = None
+        for r in self.repos:
+            if r["owner"] == owner and r["repo"] == repo and r["branch"] == branch:
+                repo_dict = r
+                break
+
+        if repo_dict is None:
+            logger.warning(
+                f"Repository {owner}/{repo}/{branch} not found, adding as new repository"
+            )
+            # If not found, add as new repository
+            final_owner = new_owner if new_owner is not None else owner
+            final_repo = new_repo if new_repo is not None else repo
+            final_branch = new_branch if new_branch is not None else branch
+            final_root_spec_path = (
+                new_root_spec_path if new_root_spec_path is not None else "spec.md"
+            )
+            self.add_repository(
+                final_owner, final_repo, final_branch, final_root_spec_path
+            )
+            return
+
+        # Stop sync timer if it exists
+        if repo_dict["sync_timer"]:
+            repo_dict["sync_timer"].cancel()
+            repo_dict["sync_timer"] = None
+
+        # Update repository fields
+        if new_owner is not None:
+            repo_dict["owner"] = new_owner
+        if new_repo is not None:
+            repo_dict["repo"] = new_repo
+        if new_branch is not None:
+            repo_dict["branch"] = new_branch
+        if new_root_spec_path is not None:
+            repo_dict["root_spec_path"] = new_root_spec_path
+
+        # Sync the repository with new configuration
+        try:
+            self._sync_repository(repo_dict)
+            logger.info(
+                f"Successfully updated repository {repo_dict['owner']}/{repo_dict['repo']}/{repo_dict['branch']}"
+            )
+        except Exception as e:
+            logger.error(
+                f"Failed to sync updated repository {repo_dict['owner']}/{repo_dict['repo']}/{repo_dict['branch']}: {e}"
+            )
+
+        # Restart sync timer if enabled
+        if self.sync_interval is not None:
+            self._start_sync_timer_for_repo(repo_dict)
+
+    def remove_repository(self, owner: str, repo: str, branch: str):
+        """
+        Remove a repository from the client and stop syncing it.
+
+        Args:
+            owner: Repository owner
+            repo: Repository name
+            branch: Branch name
+        """
+        # Find and remove the repository
+        repo_to_remove = None
+        for r in self.repos:
+            if r["owner"] == owner and r["repo"] == repo and r["branch"] == branch:
+                repo_to_remove = r
+                break
+
+        if repo_to_remove is None:
+            logger.warning(f"Repository {owner}/{repo}/{branch} not found")
+            return
+
+        # Stop sync timer if it exists
+        if repo_to_remove["sync_timer"]:
+            repo_to_remove["sync_timer"].cancel()
+            repo_to_remove["sync_timer"] = None
+
+        # Remove from repos list
+        self.repos.remove(repo_to_remove)
+
+        # Optionally remove local cache directory
+        repo_dir = (
+            self.cache_dir
+            / repo_to_remove["owner"]
+            / repo_to_remove["repo"]
+            / repo_to_remove["branch"]
+        )
+        if repo_dir.exists():
+            try:
+                import shutil
+
+                shutil.rmtree(repo_dir)
+                logger.info(f"Removed local cache directory: {repo_dir}")
+            except Exception as e:
+                logger.warning(
+                    f"Failed to remove local cache directory {repo_dir}: {e}"
+                )
+
+        logger.info(f"Successfully removed repository {owner}/{repo}/{branch}")
+
+    def _start_sync_timer_for_repo(self, repo: Dict[str, Any]):
+        """
+        Start the periodic sync timer for a specific repository.
+
+        Args:
+            repo: Repository dictionary
+        """
+
+        def sync_and_reschedule(repo: Dict[str, Any]):
+            try:
+                self._sync_repository(repo)
+            except Exception as e:
+                logger.error(f"Error in periodic sync: {e}")
+            finally:
+                # Reschedule the timer
+                cur_interval = self._get_random_interval()
+                repo["sync_timer"] = threading.Timer(
+                    cur_interval, sync_and_reschedule, args=(repo,)
+                )
+                repo["sync_timer"].daemon = True
+                repo["sync_timer"].start()
+                logger.info(
+                    f"Rescheduled periodic sync timer for repository {repo['owner']}/{repo['repo']} (interval: {cur_interval}s)"
+                )
+
+        cur_interval = self._get_random_interval()
+        repo["sync_timer"] = threading.Timer(
+            cur_interval, sync_and_reschedule, args=(repo,)
+        )
+        repo["sync_timer"].daemon = True
+        repo["sync_timer"].start()
+        logger.info(
+            f"Started periodic sync timer for repository {repo['owner']}/{repo['repo']} (interval: {cur_interval}s)"
+        )
 
     def get_doc_list(self) -> List[Dict[str, Any]]:
         """Get the list of documentation files."""

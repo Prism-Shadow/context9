@@ -641,7 +641,7 @@ class GitHubClient:
             f"Started periodic sync timer for repository {repo['owner']}/{repo['repo']} (interval: {cur_interval}s)"
         )
 
-    def get_doc_list(self) -> List[Dict[str, Any]]:
+    def list_doc(self) -> List[Dict[str, Any]]:
         """Get the list of documentation files."""
         results = []
         for repo in self.repos:

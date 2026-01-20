@@ -31,4 +31,4 @@ def list_doc() -> list[dict[str, str]]:
 
     logger.info("Listing documentation...")
 
-    return github_client.get_doc_list()
+    return github_client.list_doc()

@@ -34,3 +34,23 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* JSON syntax highlight (MCP Inspector) – CSS vars for light/dark */
+:root {
+  --json-hl-key: #2563eb;
+  --json-hl-string: #15803d;
+  --json-hl-number: #b45309;
+  --json-hl-keyword: #7c3aed;
+  --json-hl-punct: #6b7280;
+  --json-hl-fallback: #6b7280;
+  --json-hl-err: #dc2626;
+}
+.dark {
+  --json-hl-key: #60a5fa;
+  --json-hl-string: #4ade80;
+  --json-hl-number: #fbbf24;
+  --json-hl-keyword: #a78bfa;
+  --json-hl-punct: #9ca3af;
+  --json-hl-fallback: #9ca3af;
+  --json-hl-err: #f87171;
+}

@@ -6,6 +6,7 @@ import { ApiKeys } from './pages/ApiKeys';
 import { ApiKeyDetail } from './pages/ApiKeyDetail';
 import { Repositories } from './pages/Repositories';
 import { ChangePassword } from './pages/ChangePassword';
+import { Inspector } from './pages/Inspector';
 import { Layout } from './components/layout/Layout';
 
 // Protected route component
@@ -61,6 +62,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Repositories />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/inspector"
+          element={
+            <ProtectedRoute>
+              <Inspector />
             </ProtectedRoute>
           }
         />

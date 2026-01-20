@@ -37,8 +37,8 @@ export const Header: React.FC = () => {
   };
 
   return (
-    <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
-      <div className="px-6 py-4 flex items-center justify-between">
+    <header className="fixed top-0 left-0 right-0 z-20 h-16 bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+      <div className="px-6 h-full flex items-center justify-between">
         <div className="flex items-center">
           <h1 className="text-xl font-bold text-gray-900 dark:text-white">Context9 Panel</h1>
         </div>

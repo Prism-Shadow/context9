@@ -35,7 +35,7 @@ export function Table<T extends { id: number }>({
               </th>
             ))}
             {(onEdit || onDelete || actions) && (
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Actions
               </th>
             )}
@@ -60,21 +60,27 @@ export function Table<T extends { id: number }>({
                   </td>
                 ))}
                 {(onEdit || onDelete || actions) && (
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex items-center gap-2">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
+                    <div className="flex items-center justify-center gap-1">
                       {actions && actions(item)}
+                      {actions && (onEdit || onDelete) && (
+                        <span className="text-gray-300 dark:text-gray-500 shrink-0 px-1" aria-hidden>|</span>
+                      )}
                       {onEdit && (
                         <button
                           onClick={() => onEdit(item)}
-                          className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
+                          className="px-2.5 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
                         >
                           Edit
                         </button>
                       )}
+                      {onEdit && onDelete && (
+                        <span className="text-gray-300 dark:text-gray-500 shrink-0 px-1" aria-hidden>|</span>
+                      )}
                       {onDelete && (
                         <button
                           onClick={() => onDelete(item)}
-                          className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
+                          className="px-2.5 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
                         >
                           Delete
                         </button>

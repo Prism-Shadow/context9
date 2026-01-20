@@ -5,6 +5,7 @@ This module handles communication with GitHub REST API to fetch file contents.
 Uses local caching with periodic synchronization to reduce API calls.
 """
 
+import hashlib
 import shutil
 import subprocess
 import threading
@@ -23,7 +24,7 @@ from starlette.requests import Request
 import random
 from ..markdown import rewrite_relative_paths
 from ...database.database import SessionLocal
-from ...database.models import Repository
+from ...database.models import ApiKey, ApiKeyRepository, Repository
 
 
 class GitHubClientError(Exception):
@@ -641,10 +642,13 @@ class GitHubClient:
             f"Started periodic sync timer for repository {repo['owner']}/{repo['repo']} (interval: {cur_interval}s)"
         )
 
-    def list_doc(self) -> List[Dict[str, Any]]:
+    def list_doc(self, api_key: str) -> List[Dict[str, Any]]:
         """Get the list of documentation files."""
         results = []
-        for repo in self.repos:
+
+        repos = self.list_accessible_repositories(api_key)
+        logger.debug(f"Accessible repositories: {repos}")
+        for repo in repos:
             results.append(
                 {
                     "repo_name": repo["repo"],
@@ -652,8 +656,69 @@ class GitHubClient:
                     "repo_spec_path": f"remotedoc://{repo['owner']}/{repo['repo']}/{repo['branch']}/{repo['root_spec_path']}",
                 }
             )
-        logger.info(f"Doc list: {results}")
+        logger.debug(f"Doc list: {results}")
         return results
+
+    def list_accessible_repositories(self, api_key: str) -> List[Dict[str, Any]]:
+        """
+        List all repositories that the given Context9 API key has access to.
+
+        Uses ApiKey -> ApiKeyRepository -> Repository to resolve which
+        repositories are bound to this api_key.
+
+        Args:
+            api_key: Context9 API key (models.ApiKey, e.g. Bearer token value)
+
+        Returns:
+            List of dicts, each with: owner, repo, desc, branch, root_spec_path.
+            desc comes from in-memory synced repo if available, else "".
+            root_spec_path defaults to "spec.md" when not set.
+
+        Raises:
+            GitHubAuthenticationError: When api_key is not found (invalid)
+        """
+        key_hash = hashlib.sha256(api_key.encode()).hexdigest()
+        db = SessionLocal()
+        try:
+            api_key_record = (
+                db.query(ApiKey).filter(ApiKey.key_hash == key_hash).first()
+            )
+            if not api_key_record:
+                raise GitHubAuthenticationError("Invalid or unknown API key")
+
+            ak_repos = (
+                db.query(ApiKeyRepository)
+                .filter(ApiKeyRepository.api_key_id == api_key_record.id)
+                .all()
+            )
+            repo_ids = [ar.repository_id for ar in ak_repos]
+            repositories = (
+                db.query(Repository).filter(Repository.id.in_(repo_ids)).all()
+            )
+        finally:
+            db.close()
+
+        def desc_for(owner: str, repo: str, branch: str) -> str:
+            for r in self.repos:
+                if r["owner"] == owner and r["repo"] == repo and r["branch"] == branch:
+                    return r.get("desc") or ""
+            return ""
+
+        result: List[Dict[str, Any]] = []
+        for r in repositories:
+            result.append(
+                {
+                    "owner": r.owner,
+                    "repo": r.repo,
+                    "desc": desc_for(r.owner, r.repo, r.branch),
+                    "branch": r.branch,
+                    "root_spec_path": r.root_spec_path or "spec.md",
+                }
+            )
+        logger.info(
+            f"Listed {len(result)} repositories accessible by the given API key"
+        )
+        return result
 
     def read_file(self, path: str, branch: Optional[str] = None) -> str:
         """

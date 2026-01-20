@@ -3,18 +3,20 @@
 import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
-from sqlalchemy.pool import StaticPool
+from sqlalchemy.pool import NullPool
 from loguru import logger
 
 # Database file path
 DB_PATH = os.getenv("CONTEXT9_DB_PATH", "context9.db")
 DATABASE_URL = f"sqlite:///{DB_PATH}?check_same_thread=False"
 
-# Create engine with connection pooling for SQLite
+# NullPool: each request gets its own connection (no sharing). Required for SQLite
+# when sync code runs in FastAPI's thread pool; StaticPool's single connection
+# would be used from multiple threads and trigger sqlite3.InterfaceError.
 engine = create_engine(
     DATABASE_URL,
     connect_args={"check_same_thread": False},
-    poolclass=StaticPool,
+    poolclass=NullPool,
     echo=False,
 )
 

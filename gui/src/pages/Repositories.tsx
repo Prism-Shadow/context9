@@ -14,7 +14,7 @@ import { Table, Column } from '../components/common/Table';
 import { Modal } from '../components/common/Modal';
 import { Button } from '../components/common/Button';
 import { Input } from '../components/common/Input';
-import { formatDate, copyToClipboard } from '../utils/helpers';
+import { formatDate } from '../utils/helpers';
 import type { Repository, CreateRepositoryRequest, UpdateRepositoryRequest } from '../utils/types';
 
 interface RepositoryFormData {
@@ -33,12 +33,11 @@ export const Repositories: React.FC = () => {
   const [repositories, setRepositories] = useState<Repository[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isSyncingModalOpen, setIsSyncingModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isTokenModalOpen, setIsTokenModalOpen] = useState(false);
   const [editingRepo, setEditingRepo] = useState<Repository | null>(null);
   const [tokenRepo, setTokenRepo] = useState<Repository | null>(null);
-  const [newToken, setNewToken] = useState<string>('');
-  const [showNewToken, setShowNewToken] = useState(false);
   const [verifyResult, setVerifyResult] = useState<any>(null);
   const [showToken, setShowToken] = useState(false);
 
@@ -80,6 +79,7 @@ export const Repositories: React.FC = () => {
   };
 
   const handleCreate = async (data: RepositoryFormData) => {
+    setIsSyncingModalOpen(true);
     try {
       const request: CreateRepositoryRequest = {
         owner: data.owner,
@@ -88,16 +88,14 @@ export const Repositories: React.FC = () => {
         root_spec_path: data.root_spec_path || 'spec.md',
         github_token: data.github_token || undefined,
       };
-      const response = await createRepository(request);
-      if (response.github_token) {
-        setNewToken(response.github_token);
-        setShowNewToken(true);
-      }
+      await createRepository(request);
       resetCreate();
       setIsCreateModalOpen(false);
       await loadRepositories();
     } catch (error: any) {
       alert(error.response?.data?.detail || 'Failed to create');
+    } finally {
+      setIsSyncingModalOpen(false);
     }
   };
 
@@ -122,11 +120,7 @@ export const Repositories: React.FC = () => {
         root_spec_path: data.root_spec_path,
         github_token: data.github_token || undefined,
       };
-      const response = await updateRepository(editingRepo.id, request);
-      if (response.github_token) {
-        setNewToken(response.github_token);
-        setShowNewToken(true);
-      }
+      await updateRepository(editingRepo.id, request);
       setIsEditModalOpen(false);
       setEditingRepo(null);
       await loadRepositories();
@@ -155,13 +149,13 @@ export const Repositories: React.FC = () => {
   const handleSetToken = async (data: GithubTokenFormData) => {
     if (!tokenRepo) return;
     try {
-      const response = tokenRepo.has_github_token
-        ? await updateGithubToken(tokenRepo.id, data.github_token)
-        : await setGithubToken(tokenRepo.id, data.github_token);
-      setNewToken(response.github_token);
-      setShowNewToken(true);
+      await (tokenRepo.has_github_token
+        ? updateGithubToken(tokenRepo.id, data.github_token)
+        : setGithubToken(tokenRepo.id, data.github_token));
       resetToken();
       setVerifyResult(null);
+      setIsTokenModalOpen(false);
+      setTokenRepo(null);
       await loadRepositories();
     } catch (error: any) {
       alert(error.response?.data?.detail || 'Failed to set');
@@ -222,43 +216,6 @@ export const Repositories: React.FC = () => {
         <Button onClick={() => setIsCreateModalOpen(true)}>Create Repository</Button>
       </div>
 
-      {showNewToken && newToken && (
-        <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-yellow-800 mb-1">
-                GitHub Token has been set, please save it securely (shown only once):
-              </p>
-              <code className="text-sm text-yellow-900 bg-yellow-100 px-2 py-1 rounded">
-                {newToken}
-              </code>
-            </div>
-            <div className="flex gap-2">
-              <Button
-                size="sm"
-                variant="secondary"
-                onClick={() => {
-                  copyToClipboard(newToken);
-                  alert('Copied to clipboard');
-                }}
-              >
-                Copy
-              </Button>
-              <Button
-                size="sm"
-                variant="secondary"
-                onClick={() => {
-                  setShowNewToken(false);
-                  setNewToken('');
-                }}
-              >
-                Close
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
       <Table
         data={repositories}
         columns={columns}
@@ -278,6 +235,7 @@ export const Repositories: React.FC = () => {
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         title="Create Repository"
+        closeOnOverlayClick={false}
       >
         <form onSubmit={handleSubmitCreate(handleCreate)} className="space-y-4">
           <Input
@@ -330,6 +288,39 @@ export const Repositories: React.FC = () => {
             </Button>
           </div>
         </form>
+      </Modal>
+
+      <Modal
+        isOpen={isSyncingModalOpen}
+        onClose={() => {}}
+        title=""
+        closeOnOverlayClick={false}
+        showCloseButton={false}
+      >
+        <div className="flex flex-col items-center justify-center py-6 gap-3">
+          <svg
+            className="animate-spin h-10 w-10 text-primary-600"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            aria-label="Loading"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            />
+          </svg>
+          <p className="text-gray-600">Syncing...</p>
+        </div>
       </Modal>
 
       <Modal

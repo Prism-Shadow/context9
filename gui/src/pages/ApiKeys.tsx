@@ -184,6 +184,7 @@ export const ApiKeys: React.FC = () => {
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         title="Create API Key"
+        closeOnOverlayClick={false}
       >
         <form onSubmit={handleSubmitCreate(handleCreate)} className="space-y-4">
           <Input

@@ -108,6 +108,10 @@ def main():
     else:
         logger.info("GitHub webhook is disabled")
 
+    logger.info("Initializing MCP server...")
+    api_key, github_client, context9_mcp = initialize_mcp_server(args)
+    logger.info("MCP server initialized")
+
     # Initialize database
     logger.info("Initializing database...")
     try:
@@ -126,10 +130,8 @@ def main():
         # Still continue - user might want to fix it manually
         logger.warning("Server will start, but admin functionality may not work.")
 
-    # Initialize server
-    logger.info("Initializing MCP server...")
-    api_key, github_client, context9_mcp = initialize_mcp_server(args)
-    logger.info("MCP server initialized")
+    # sync repositories from database
+    github_client.sync_database()
 
     # Create the MCP server as a Starlette app
     mcp_app = context9_mcp.http_app(path="/api/mcp/")

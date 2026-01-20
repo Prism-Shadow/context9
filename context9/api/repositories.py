@@ -5,6 +5,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
+from loguru import logger
 
 from ..database import get_db
 from ..database.models import Repository
@@ -15,6 +16,13 @@ from ..utils.datetime_utils import (
     convert_to_client_timezone,
     get_client_timezone,
 )
+
+# Import github_client from mcp_server module
+try:
+    from ..mcp_server.mcp_server import github_client
+except ImportError:
+    github_client = None
+    logger.warning("github_client not available, repository sync will be skipped")
 
 router = APIRouter()
 
@@ -149,6 +157,27 @@ def create_repository(
     db.commit()
     db.refresh(repo)
 
+    # Sync with github_client
+    if github_client is not None:
+        try:
+            github_client.add_repository(
+                owner=repo.owner,
+                repo=repo.repo,
+                branch=repo.branch,
+                root_spec_path=repo.root_spec_path,
+            )
+            logger.info(
+                f"Successfully synced repository {repo.owner}/{repo.repo}/{repo.branch} to github_client"
+            )
+        except Exception as e:
+            logger.error(
+                f"Failed to sync repository {repo.owner}/{repo.repo}/{repo.branch} to github_client: {e}",
+                exc_info=True,
+            )
+            # Don't fail the request if sync fails, just log the error
+    else:
+        logger.warning("github_client not available, repository sync will be skipped")
+
     client_tz = get_client_timezone(http_request)
     response_data = {
         "id": repo.id,
@@ -189,6 +218,11 @@ def update_repository(
             detail="Repository not found",
         )
 
+    # Save old values before updating (needed for github_client sync)
+    old_owner = repo.owner
+    old_repo = repo.repo
+    old_branch = repo.branch
+
     github_token_plain = None
     if request.owner is not None:
         repo.owner = request.owner
@@ -207,6 +241,30 @@ def update_repository(
 
     db.commit()
     db.refresh(repo)
+
+    # Sync with github_client
+    if github_client is not None:
+        try:
+            github_client.update_repository(
+                owner=old_owner,
+                repo=old_repo,
+                branch=old_branch,
+                new_owner=request.owner if request.owner is not None else None,
+                new_repo=request.repo if request.repo is not None else None,
+                new_branch=request.branch if request.branch is not None else None,
+                new_root_spec_path=request.root_spec_path
+                if request.root_spec_path is not None
+                else None,
+            )
+            logger.info(
+                f"Successfully synced repository update from {old_owner}/{old_repo}/{old_branch} to {repo.owner}/{repo.repo}/{repo.branch} in github_client"
+            )
+        except Exception as e:
+            logger.error(
+                f"Failed to sync repository update {repo.owner}/{repo.repo}/{repo.branch} to github_client: {e}",
+                exc_info=True,
+            )
+            # Don't fail the request if sync fails, just log the error
 
     client_tz = get_client_timezone(http_request)
     response_data = {
@@ -245,8 +303,29 @@ def delete_repository(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Repository not found",
         )
+
+    # Save repository info before deletion (needed for github_client sync)
+    owner = repo.owner
+    repo_name = repo.repo
+    branch = repo.branch
+
     db.delete(repo)
     db.commit()
+
+    # Sync with github_client
+    if github_client is not None:
+        try:
+            github_client.remove_repository(owner=owner, repo=repo_name, branch=branch)
+            logger.info(
+                f"Successfully synced repository deletion {owner}/{repo_name}/{branch} to github_client"
+            )
+        except Exception as e:
+            logger.error(
+                f"Failed to sync repository deletion {owner}/{repo_name}/{branch} to github_client: {e}",
+                exc_info=True,
+            )
+            # Don't fail the request if sync fails, just log the error
+
     return {"message": "Repository deleted successfully"}
 
 

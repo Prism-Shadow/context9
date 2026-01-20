@@ -133,10 +133,10 @@ def main():
     # sync repositories from database
     github_client.sync_database()
 
-    # Create the MCP server as a Starlette app
-    mcp_app = context9_mcp.http_app(path="/api/mcp/")
-
-    mcp_app.add_middleware(SelectiveAPIKeyMiddleware, api_key=api_key)
+    # Create the MCP server as a Starlette app.
+    # path 必须是「挂载到子应用后」子应用看到的路径：Mount("/api/mcp", ...) 会去掉 /api/mcp，
+    # 所以 /api/mcp/ 在子应用里是 /，这里应填 "/" 而不能填 "/api/mcp/"。
+    mcp_app = context9_mcp.http_app(path="/")
 
     # Create FastAPI app for admin panel
     admin_app = FastAPI(title="Context9 Admin API", version="0.1.0")
@@ -173,12 +173,15 @@ def main():
             "Frontend build not found, serving API only. Run 'npm run build' in gui/ to build frontend."
         )
 
-    # Create main app that combines both
+    # Create main app that combines both.
+    # 必须传入 lifespan=mcp_app.lifespan，否则 FastMCP 的 StreamableHTTPSessionManager
+    # 的 task group 未初始化，会报 "Task group is not initialized. Make sure to use run()."
     app = Starlette(
         routes=[
             Mount("/api/mcp", app=mcp_app),
             Mount("", app=admin_app),
-        ]
+        ],
+        lifespan=mcp_app.lifespan,
     )
 
     # Setup GitHub webhook route
@@ -188,7 +191,7 @@ def main():
     )
 
     # Add selective API key authentication middleware
-    # app.add_middleware(SelectiveAPIKeyMiddleware, api_key=api_key)
+    app.add_middleware(SelectiveAPIKeyMiddleware)
 
     logger.info(f"MCP server running on http://0.0.0.0:{args.port}/api/mcp/")
     logger.info(f"Admin API running on http://0.0.0.0:{args.port}/api/admin/")

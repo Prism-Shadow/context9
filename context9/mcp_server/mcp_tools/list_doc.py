@@ -1,5 +1,7 @@
 from loguru import logger
 from .mcp_instance import context9_mcp
+from fastmcp.server.dependencies import get_http_headers
+from .. import mcp_server
 
 
 @context9_mcp.tool()
@@ -24,11 +26,15 @@ def list_doc() -> list[dict[str, str]]:
         ValueError: If the documentation list cannot be read
         Exception: If an unexpected error occurs
     """
-    from ..mcp_server import github_client
 
-    if not github_client:
+    headers = get_http_headers()
+    auth_header = headers.get("Authorization")
+    logger.info(f"Headers: {headers}")
+    logger.debug(f"Authorization header: {auth_header}")
+
+    if not mcp_server.github_client:
         raise ValueError("Server not initialized. Please check configuration.")
 
     logger.info("Listing documentation...")
 
-    return github_client.list_doc()
+    return mcp_server.github_client.list_doc()

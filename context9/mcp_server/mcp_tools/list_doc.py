@@ -28,13 +28,15 @@ def list_doc() -> list[dict[str, str]]:
     """
 
     headers = get_http_headers()
-    auth_header = headers.get("Authorization")
-    logger.info(f"Headers: {headers}")
-    logger.debug(f"Authorization header: {auth_header}")
+    api_key = headers.get("Authorization") or headers.get("authorization")
+    if api_key and api_key.lower().startswith("bearer "):
+        api_key = api_key[7:].strip()
+
+    logger.info(f"API key: {api_key}")
 
     if not mcp_server.github_client:
         raise ValueError("Server not initialized. Please check configuration.")
 
     logger.info("Listing documentation...")
 
-    return mcp_server.github_client.list_doc()
+    return mcp_server.github_client.list_doc(api_key)

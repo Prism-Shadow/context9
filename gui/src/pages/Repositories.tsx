@@ -5,10 +5,6 @@ import {
   createRepository,
   updateRepository,
   deleteRepository,
-  setGithubToken,
-  updateGithubToken,
-  deleteGithubToken,
-  verifyGithubToken,
 } from '../services/repositories';
 import { Table, Column } from '../components/common/Table';
 import { Modal } from '../components/common/Modal';
@@ -25,20 +21,13 @@ interface RepositoryFormData {
   github_token?: string;
 }
 
-interface GithubTokenFormData {
-  github_token: string;
-}
-
 export const Repositories: React.FC = () => {
   const [repositories, setRepositories] = useState<Repository[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isSyncingModalOpen, setIsSyncingModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isTokenModalOpen, setIsTokenModalOpen] = useState(false);
   const [editingRepo, setEditingRepo] = useState<Repository | null>(null);
-  const [tokenRepo, setTokenRepo] = useState<Repository | null>(null);
-  const [verifyResult, setVerifyResult] = useState<any>(null);
   const [showToken, setShowToken] = useState(false);
 
   const {
@@ -54,13 +43,6 @@ export const Repositories: React.FC = () => {
     formState: { errors: errorsEdit },
     reset: resetEdit,
   } = useForm<RepositoryFormData>();
-
-  const {
-    register: registerToken,
-    handleSubmit: handleSubmitToken,
-    formState: { errors: errorsToken },
-    reset: resetToken,
-  } = useForm<GithubTokenFormData>();
 
   useEffect(() => {
     loadRepositories();
@@ -139,55 +121,6 @@ export const Repositories: React.FC = () => {
     }
   };
 
-  const handleManageToken = (repo: Repository) => {
-    setTokenRepo(repo);
-    resetToken();
-    setVerifyResult(null);
-    setIsTokenModalOpen(true);
-  };
-
-  const handleSetToken = async (data: GithubTokenFormData) => {
-    if (!tokenRepo) return;
-    try {
-      await (tokenRepo.has_github_token
-        ? updateGithubToken(tokenRepo.id, data.github_token)
-        : setGithubToken(tokenRepo.id, data.github_token));
-      resetToken();
-      setVerifyResult(null);
-      setIsTokenModalOpen(false);
-      setTokenRepo(null);
-      await loadRepositories();
-    } catch (error: any) {
-      alert(error.response?.data?.detail || 'Failed to set');
-    }
-  };
-
-  const handleDeleteToken = async () => {
-    if (!tokenRepo) return;
-    if (!confirm('Are you sure you want to delete the GitHub Token?')) return;
-    try {
-      await deleteGithubToken(tokenRepo.id);
-      setIsTokenModalOpen(false);
-      setTokenRepo(null);
-      await loadRepositories();
-    } catch (error: any) {
-      alert(error.response?.data?.detail || 'Failed to delete');
-    }
-  };
-
-  const handleVerifyToken = async () => {
-    if (!tokenRepo) return;
-    try {
-      const result = await verifyGithubToken(tokenRepo.id);
-      setVerifyResult(result);
-    } catch (error: any) {
-      setVerifyResult({
-        valid: false,
-        error: error.response?.data?.detail || 'Verification failed',
-      });
-    }
-  };
-
   const columns: Column<Repository>[] = [
     { key: 'owner', header: 'Owner' },
     { key: 'repo', header: 'Repo' },
@@ -221,14 +154,6 @@ export const Repositories: React.FC = () => {
         columns={columns}
         onEdit={handleEdit}
         onDelete={handleDelete}
-        actions={(item) => (
-          <button
-            onClick={() => handleManageToken(item)}
-            className="text-primary-600 hover:text-primary-900"
-          >
-            Manage Token
-          </button>
-        )}
       />
 
       <Modal
@@ -381,100 +306,6 @@ export const Repositories: React.FC = () => {
             </Button>
             <Button type="submit" variant="primary">
               Save
-            </Button>
-          </div>
-        </form>
-      </Modal>
-
-      <Modal
-        isOpen={isTokenModalOpen}
-        onClose={() => {
-          setIsTokenModalOpen(false);
-          setTokenRepo(null);
-          setVerifyResult(null);
-        }}
-        title={`Manage GitHub Token - ${tokenRepo?.owner}/${tokenRepo?.repo}`}
-      >
-        <form onSubmit={handleSubmitToken(handleSetToken)} className="space-y-4">
-          <Input
-            label="GitHub Token"
-            type={showToken ? 'text' : 'password'}
-            {...registerToken('github_token', {
-              required: tokenRepo?.has_github_token ? false : 'GitHub Token is required',
-            })}
-            placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
-            error={errorsToken.github_token?.message}
-          />
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setShowToken(!showToken)}
-              className="text-sm text-gray-600 hover:text-gray-800"
-            >
-              {showToken ? 'Hide' : 'Show'} Token
-            </button>
-            {tokenRepo?.has_github_token && (
-              <>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  onClick={handleVerifyToken}
-                >
-                  Verify Token
-                </Button>
-                <Button
-                  type="button"
-                  variant="danger"
-                  size="sm"
-                  onClick={handleDeleteToken}
-                >
-                  Delete Token
-                </Button>
-              </>
-            )}
-          </div>
-          {verifyResult && (
-            <div
-              className={`p-3 rounded ${
-                verifyResult.valid
-                  ? 'bg-green-50 text-green-700 border border-green-200'
-                  : 'bg-red-50 text-red-700 border border-red-200'
-              }`}
-            >
-              {verifyResult.valid ? (
-                <div>
-                  <p>✓ Token is valid</p>
-                  {verifyResult.scopes && (
-                    <p className="text-xs mt-1">
-                      Scopes: {verifyResult.scopes.join(', ')}
-                    </p>
-                  )}
-                  {verifyResult.rate_limit_remaining !== undefined && (
-                    <p className="text-xs mt-1">
-                      Remaining requests: {verifyResult.rate_limit_remaining}
-                    </p>
-                  )}
-                </div>
-              ) : (
-                <p>✗ Token is invalid: {verifyResult.error}</p>
-              )}
-            </div>
-          )}
-          <div className="flex gap-2 justify-end">
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => {
-                setIsTokenModalOpen(false);
-                setTokenRepo(null);
-                setVerifyResult(null);
-              }}
-            >
-              Close
-            </Button>
-            <Button type="submit" variant="primary">
-              {tokenRepo?.has_github_token ? 'Update Token' : 'Set Token'}
             </Button>
           </div>
         </form>

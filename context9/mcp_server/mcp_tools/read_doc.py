@@ -1,8 +1,11 @@
 from ..github_client import GitHubClientError, GitHubFileNotFoundError
 from ..utils import parse_remotedoc_url, URLParseError
+from fastmcp.server.dependencies import get_http_headers
 
 from .mcp_instance import context9_mcp
 from loguru import logger
+
+from .. import mcp_server
 
 
 @context9_mcp.tool()
@@ -25,9 +28,13 @@ def read_doc(url: str) -> str:
         ValueError: If the URL is invalid or the file cannot be read
     """
     # remotedoc://owner/repo/branch/url
-    from ..mcp_server import github_client
 
-    if not github_client:
+    headers = get_http_headers()
+    api_key = headers.get("Authorization") or headers.get("authorization")
+    if api_key and api_key.lower().startswith("bearer "):
+        api_key = api_key[7:].strip()
+
+    if not mcp_server.github_client:
         raise ValueError("Server not initialized. Please check configuration.")
 
     try:
@@ -37,7 +44,7 @@ def read_doc(url: str) -> str:
         logger.info(f"Resolved file path: {file_path}")
 
         # Read file from GitHub
-        content = github_client.read_file(file_path)
+        content = mcp_server.github_client.read_doc(file_path, api_key)
 
         logger.info(
             f"Successfully read document: {file_path} ({len(content)} characters)"

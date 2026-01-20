@@ -173,9 +173,9 @@ export const ApiKeys: React.FC = () => {
         actions={(item) => (
           <button
             onClick={() => handleManagePermissions(item)}
-            className="text-primary-500 dark:text-primary-200 hover:text-primary-600 dark:hover:text-primary-100"
+            className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
           >
-            Manage Permissions
+            Permissions
           </button>
         )}
       />

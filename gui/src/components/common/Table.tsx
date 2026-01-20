@@ -66,7 +66,7 @@ export function Table<T extends { id: number }>({
                       {onEdit && (
                         <button
                           onClick={() => onEdit(item)}
-                          className="text-primary-500 dark:text-primary-200 hover:text-primary-600 dark:hover:text-primary-100"
+                          className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
                         >
                           Edit
                         </button>

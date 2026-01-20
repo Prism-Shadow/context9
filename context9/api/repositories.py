@@ -16,13 +16,7 @@ from ..utils.datetime_utils import (
     convert_to_client_timezone,
     get_client_timezone,
 )
-
-# Import github_client from mcp_server module
-try:
-    from ..mcp_server.mcp_server import github_client
-except ImportError:
-    github_client = None
-    logger.warning("github_client not available, repository sync will be skipped")
+from ..mcp_server import mcp_server
 
 router = APIRouter()
 
@@ -158,9 +152,9 @@ def create_repository(
     db.refresh(repo)
 
     # Sync with github_client
-    if github_client is not None:
+    if mcp_server.github_client is not None:
         try:
-            github_client.add_repository(
+            mcp_server.github_client.add_repository(
                 owner=repo.owner,
                 repo=repo.repo,
                 branch=repo.branch,
@@ -243,9 +237,9 @@ def update_repository(
     db.refresh(repo)
 
     # Sync with github_client
-    if github_client is not None:
+    if mcp_server.github_client is not None:
         try:
-            github_client.update_repository(
+            mcp_server.github_client.update_repository(
                 owner=old_owner,
                 repo=old_repo,
                 branch=old_branch,
@@ -312,10 +306,21 @@ def delete_repository(
     db.delete(repo)
     db.commit()
 
+    if mcp_server.github_client is None:
+        logger.warning(
+            "github_client not available, repository deletion will be skipped"
+        )
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Repository not found",
+        )
+
     # Sync with github_client
-    if github_client is not None:
+    if mcp_server.github_client is not None:
         try:
-            github_client.remove_repository(owner=owner, repo=repo_name, branch=branch)
+            mcp_server.github_client.remove_repository(
+                owner=owner, repo=repo_name, branch=branch
+            )
             logger.info(
                 f"Successfully synced repository deletion {owner}/{repo_name}/{branch} to github_client"
             )

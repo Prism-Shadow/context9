@@ -55,7 +55,7 @@ export const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-primary-50/30 to-slate-100">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 via-primary-50/80 to-primary-100/60">
       <div className="max-w-md w-full space-y-8 p-10 bg-white/95 backdrop-blur rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100">
         <div>
           <h2 className="text-center text-3xl font-extrabold text-gray-900 tracking-tight">

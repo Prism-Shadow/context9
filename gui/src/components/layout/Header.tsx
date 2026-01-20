@@ -39,7 +39,7 @@ export const Header: React.FC = () => {
     <header className="bg-white shadow-sm border-b border-gray-200">
       <div className="px-6 py-4 flex items-center justify-between">
         <div className="flex items-center">
-          <h1 className="text-xl font-bold text-gray-900">Context9 Admin Panel</h1>
+          <h1 className="text-xl font-bold text-gray-900">Context9 Panel</h1>
         </div>
         <div className="flex items-center gap-4">
           {user && (
@@ -48,7 +48,7 @@ export const Header: React.FC = () => {
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 className="flex items-center gap-2 text-sm text-gray-700 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded-lg px-3 py-2"
               >
-                <span className="font-medium">Admin: {user.username}</span>
+                <span className="font-medium">{user.username}</span>
                 <svg
                   className={`w-4 h-4 transition-transform ${
                     isDropdownOpen ? 'transform rotate-180' : ''

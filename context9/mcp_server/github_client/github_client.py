@@ -720,7 +720,57 @@ class GitHubClient:
         )
         return result
 
-    def read_file(self, path: str, branch: Optional[str] = None) -> str:
+    def can_access_repository(
+        self, owner: str, repo: str, branch: str, api_key: str
+    ) -> bool:
+        """
+        Check whether the given Context9 API key has access to the repository.
+
+        Args:
+            owner: Repository owner
+            repo: Repository name
+            branch: Branch name
+            api_key: Context9 API key (models.ApiKey, e.g. Bearer token value)
+
+        Returns:
+            True if the api_key is bound to a Repository with the given owner,
+            repo, branch via ApiKeyRepository; False if api_key is invalid, the
+            repository does not exist, or it is not linked to this api_key.
+        """
+        key_hash = hashlib.sha256(api_key.encode()).hexdigest()
+        db = SessionLocal()
+        try:
+            api_key_record = (
+                db.query(ApiKey).filter(ApiKey.key_hash == key_hash).first()
+            )
+            if not api_key_record:
+                return False
+
+            repository = (
+                db.query(Repository)
+                .filter(
+                    Repository.owner == owner,
+                    Repository.repo == repo,
+                    Repository.branch == branch,
+                )
+                .first()
+            )
+            if not repository:
+                return False
+
+            ak_repo = (
+                db.query(ApiKeyRepository)
+                .filter(
+                    ApiKeyRepository.api_key_id == api_key_record.id,
+                    ApiKeyRepository.repository_id == repository.id,
+                )
+                .first()
+            )
+            return ak_repo is not None
+        finally:
+            db.close()
+
+    def read_doc(self, path: str, api_key: str, branch: Optional[str] = None) -> str:
         """
         Read a file from the local cached repository.
 
@@ -754,6 +804,11 @@ class GitHubClient:
         if branch != repo["branch"]:
             logger.warning(
                 f"Requested branch {branch} differs from cached branch {repo['branch']}. Using cached branch."
+            )
+
+        if not self.can_access_repository(repo["owner"], repo["repo"], branch, api_key):
+            raise GitHubAuthenticationError(
+                f"API key does not have access to repository {repo['owner']}/{repo['repo']}/{branch}"
             )
 
         # Construct local file path

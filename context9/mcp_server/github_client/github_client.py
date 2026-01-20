@@ -5,6 +5,7 @@ This module handles communication with GitHub REST API to fetch file contents.
 Uses local caching with periodic synchronization to reduce API calls.
 """
 
+import shutil
 import subprocess
 import threading
 import time
@@ -579,7 +580,7 @@ class GitHubClient:
         # Remove from repos list
         self.repos.remove(repo_to_remove)
 
-        # Optionally remove local cache directory
+        # Remove local cache directory and empty parent dirs (repo, owner)
         repo_dir = (
             self.cache_dir
             / repo_to_remove["owner"]
@@ -588,10 +589,16 @@ class GitHubClient:
         )
         if repo_dir.exists():
             try:
-                import shutil
-
                 shutil.rmtree(repo_dir)
                 logger.info(f"Removed local cache directory: {repo_dir}")
+                # Remove empty parent directories (repo, then owner)
+                for parent in [repo_dir.parent, repo_dir.parent.parent]:
+                    if parent != self.cache_dir and parent.exists():
+                        try:
+                            parent.rmdir()
+                            logger.info(f"Removed empty directory: {parent}")
+                        except OSError:
+                            pass
             except Exception as e:
                 logger.warning(
                     f"Failed to remove local cache directory {repo_dir}: {e}"

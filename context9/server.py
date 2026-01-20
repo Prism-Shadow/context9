@@ -108,10 +108,6 @@ def main():
     else:
         logger.info("GitHub webhook is disabled")
 
-    logger.info("Initializing MCP server...")
-    api_key, github_client, context9_mcp = initialize_mcp_server(args)
-    logger.info("MCP server initialized")
-
     # Initialize database
     logger.info("Initializing database...")
     try:
@@ -130,11 +126,17 @@ def main():
         # Still continue - user might want to fix it manually
         logger.warning("Server will start, but admin functionality may not work.")
 
+    logger.info("Initializing MCP server...")
+    api_key, github_client, context9_mcp = initialize_mcp_server(args)
+    logger.info("MCP server initialized")
+
     # sync repositories from database
     github_client.sync_database()
 
     # Create the MCP server as a Starlette app
     mcp_app = context9_mcp.http_app(path="/api/mcp/")
+
+    mcp_app.add_middleware(SelectiveAPIKeyMiddleware, api_key=api_key)
 
     # Create FastAPI app for admin panel
     admin_app = FastAPI(title="Context9 Admin API", version="0.1.0")
@@ -186,7 +188,7 @@ def main():
     )
 
     # Add selective API key authentication middleware
-    app.add_middleware(SelectiveAPIKeyMiddleware, api_key=api_key)
+    # app.add_middleware(SelectiveAPIKeyMiddleware, api_key=api_key)
 
     logger.info(f"MCP server running on http://0.0.0.0:{args.port}/api/mcp/")
     logger.info(f"Admin API running on http://0.0.0.0:{args.port}/api/admin/")

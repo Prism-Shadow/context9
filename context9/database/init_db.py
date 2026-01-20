@@ -67,8 +67,8 @@ def initialize_database():
         raise
 
     # Create default admin from environment or use defaults
-    admin_username = os.getenv("CONTEXT9_ADMIN_USERNAME", "admin")
-    admin_password = os.getenv("CONTEXT9_ADMIN_PASSWORD", "admin123")
+    admin_username = os.getenv("CONTEXT9_ADMIN_USERNAME", "ctx9-admin")
+    admin_password = os.getenv("CONTEXT9_ADMIN_PASSWORD", "88888888")
 
     # Always try to create default admin - this function handles the case where admin already exists
     try:

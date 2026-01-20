@@ -118,24 +118,24 @@ export const ApiKeys: React.FC = () => {
   ];
 
   if (loading) {
-    return <div className="text-center py-8">Loading...</div>;
+    return <div className="text-center py-8 text-gray-500 dark:text-gray-400">Loading...</div>;
   }
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">API Keys Management</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">API Keys Management</h1>
         <Button onClick={() => setIsCreateModalOpen(true)}>Create API Key</Button>
       </div>
 
       {showNewKey && newKey && (
-        <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+        <div className="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-yellow-800 mb-1">
+              <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200 mb-1">
                 New API Key created, please save it securely (shown only once):
               </p>
-              <code className="text-sm text-yellow-900 bg-yellow-100 px-2 py-1 rounded">
+              <code className="text-sm text-yellow-900 dark:text-yellow-100 bg-yellow-100 dark:bg-yellow-900/40 px-2 py-1 rounded">
                 {newKey}
               </code>
             </div>
@@ -173,7 +173,7 @@ export const ApiKeys: React.FC = () => {
         actions={(item) => (
           <button
             onClick={() => handleManagePermissions(item)}
-            className="text-primary-600 hover:text-primary-900"
+            className="text-primary-500 dark:text-primary-200 hover:text-primary-600 dark:hover:text-primary-100"
           >
             Manage Permissions
           </button>

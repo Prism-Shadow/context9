@@ -17,7 +17,7 @@ export const Sidebar: React.FC = () => {
   ];
 
   return (
-    <aside className="w-64 flex-shrink-0 self-start bg-white shadow-sm border-r border-gray-200 h-[calc(100vh-4rem)] flex flex-col">
+    <aside className="w-64 flex-shrink-0 self-start bg-white dark:bg-gray-800 shadow-sm border-r border-gray-200 dark:border-gray-700 h-[calc(100vh-4rem)] flex flex-col">
       <nav className="p-4 flex-1 min-h-0 overflow-y-auto">
         <ul className="space-y-2">
           {navItems.map((item) => (
@@ -27,8 +27,8 @@ export const Sidebar: React.FC = () => {
                 className={({ isActive }) =>
                   `block px-4 py-2 rounded-lg transition-colors ${
                     isActive
-                      ? 'bg-primary-100 text-primary-700 font-medium'
-                      : 'text-gray-700 hover:bg-gray-100'
+                      ? 'bg-primary-100 dark:bg-primary-600/30 text-primary-700 dark:text-primary-100 font-medium'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`
                 }
               >
@@ -38,12 +38,12 @@ export const Sidebar: React.FC = () => {
           ))}
         </ul>
       </nav>
-      <div className="p-4 flex justify-center items-center border-t border-gray-100 flex-shrink-0">
+      <div className="p-4 flex justify-center items-center border-t border-gray-100 dark:border-gray-700 flex-shrink-0">
         <a
           href={GITHUB_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-gray-600 hover:text-gray-900 transition-colors inline-flex"
+          className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors inline-flex"
           aria-label="GitHub"
         >
           <GitHubIcon />

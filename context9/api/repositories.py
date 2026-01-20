@@ -10,7 +10,6 @@ from loguru import logger
 from ..database import get_db
 from ..database.models import Repository
 from ..auth.admin_auth import get_current_admin
-from ..auth.encryption import encrypt_token, decrypt_token
 from ..utils.datetime_utils import (
     get_utc_now,
     convert_to_client_timezone,
@@ -93,7 +92,7 @@ def get_repositories(
                 "repo": repo.repo,
                 "branch": repo.branch,
                 "root_spec_path": repo.root_spec_path,
-                "has_github_token": repo.github_token_encrypted is not None,
+                "has_github_token": repo.github_token is not None,
                 "github_token_created_at": convert_to_client_timezone(
                     repo.github_token_created_at, client_tz
                 ),
@@ -143,7 +142,7 @@ def create_repository(
 
     github_token_plain = None
     if request.github_token:
-        repo.github_token_encrypted = encrypt_token(request.github_token)
+        repo.github_token = request.github_token
         repo.github_token_created_at = get_utc_now()
         github_token_plain = request.github_token  # Return once
 
@@ -179,7 +178,7 @@ def create_repository(
         "repo": repo.repo,
         "branch": repo.branch,
         "root_spec_path": repo.root_spec_path,
-        "has_github_token": repo.github_token_encrypted is not None,
+        "has_github_token": repo.github_token is not None,
         "github_token_created_at": convert_to_client_timezone(
             repo.github_token_created_at, client_tz
         ),
@@ -227,7 +226,7 @@ def update_repository(
     if request.root_spec_path is not None:
         repo.root_spec_path = request.root_spec_path
     if request.github_token is not None:
-        repo.github_token_encrypted = encrypt_token(request.github_token)
+        repo.github_token = request.github_token
         if repo.github_token_created_at is None:
             repo.github_token_created_at = get_utc_now()
         repo.github_token_updated_at = get_utc_now()
@@ -267,7 +266,7 @@ def update_repository(
         "repo": repo.repo,
         "branch": repo.branch,
         "root_spec_path": repo.root_spec_path,
-        "has_github_token": repo.github_token_encrypted is not None,
+        "has_github_token": repo.github_token is not None,
         "github_token_created_at": convert_to_client_timezone(
             repo.github_token_created_at, client_tz
         ),
@@ -350,7 +349,7 @@ def set_github_token(
             detail="Repository not found",
         )
 
-    repo.github_token_encrypted = encrypt_token(request.github_token)
+    repo.github_token = request.github_token
     if repo.github_token_created_at is None:
         repo.github_token_created_at = get_utc_now()
     repo.github_token_updated_at = get_utc_now()
@@ -388,7 +387,7 @@ def update_github_token(
             detail="Repository not found",
         )
 
-    repo.github_token_encrypted = encrypt_token(request.github_token)
+    repo.github_token = request.github_token
     repo.github_token_updated_at = get_utc_now()
 
     db.commit()
@@ -424,7 +423,7 @@ def delete_github_token(
             detail="Repository not found",
         )
 
-    repo.github_token_encrypted = None
+    repo.github_token = None
     repo.github_token_created_at = None
     repo.github_token_updated_at = None
 
@@ -446,14 +445,14 @@ def verify_github_token(
             detail="Repository not found",
         )
 
-    if not repo.github_token_encrypted:
+    if not repo.github_token:
         return VerifyGithubTokenResponse(
             valid=False,
             error="No GitHub token configured",
         )
 
     try:
-        token = decrypt_token(repo.github_token_encrypted)
+        token = repo.github_token
         # Verify token with GitHub API
         headers = {"Authorization": f"token {token}"}
         response = requests.get(

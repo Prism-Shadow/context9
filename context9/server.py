@@ -127,7 +127,7 @@ def main():
         logger.warning("Server will start, but admin functionality may not work.")
 
     logger.info("Initializing MCP server...")
-    api_key, github_client, context9_mcp = initialize_mcp_server(args)
+    github_client, context9_mcp = initialize_mcp_server(args)
     logger.info("MCP server initialized")
 
     # sync repositories from database

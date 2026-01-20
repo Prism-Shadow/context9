@@ -61,7 +61,6 @@ class GitHubClient:
     def __init__(
         self,
         repos: List[Dict[str, Any]],
-        token: Optional[str] = None,
         timeout: int = 30,
         max_retries: int = 3,
         cache_dir: Optional[str] = None,
@@ -82,7 +81,6 @@ class GitHubClient:
             enable_github_webhook: Enable GitHub webhook (default: False)
             max_workers: Maximum number of workers to use for parallel synchronization (default: 5)
         """
-        self.token = token
         self.timeout = timeout
         self.sync_interval = sync_interval
         self.enable_github_webhook = enable_github_webhook
@@ -114,14 +112,6 @@ class GitHubClient:
         self.session.mount("http://", adapter)
         self.session.mount("https://", adapter)
 
-        # Set up authentication headers
-        self.headers = {
-            "Accept": "application/vnd.github.v3.raw",
-            "User-Agent": "Context9/0.1.0",
-        }
-        if self.token:
-            self.headers["Authorization"] = f"token {self.token}"
-
     def sync_database(self):
         # Load repositories from database instead of using repos parameter
         # Note: repos parameter is kept for backward compatibility but not used
@@ -140,6 +130,7 @@ class GitHubClient:
                     "repo": db_repo.repo,
                     "branch": db_repo.branch,
                     "root_spec_path": db_repo.root_spec_path or "spec.md",
+                    "github_token": db_repo.github_token,
                     "sync_timer": None,
                     "is_syncing": False,
                     "sync_lock": ReadWriteLock(),
@@ -174,9 +165,10 @@ class GitHubClient:
 
     def _get_repo_url(self, repo: Dict[str, Any]) -> str:
         """Get the repository URL for git operations."""
-        if self.token:
+        token = repo.get("github_token")
+        if token:
             # Use token in URL for authentication
-            return f"https://{self.token}@github.com/{repo['owner']}/{repo['repo']}.git"
+            return f"https://{token}@github.com/{repo['owner']}/{repo['repo']}.git"
         else:
             return f"https://github.com/{repo['owner']}/{repo['repo']}.git"
 
@@ -884,26 +876,6 @@ class GitHubClient:
                 logger.error(error_msg, exc_info=True)
                 raise GitHubClientError(error_msg)
 
-    def check_rate_limit(self) -> dict:
-        """
-        Check current GitHub API rate limit status.
-
-        Returns:
-            Dictionary with rate limit information
-        """
-        url = f"{self.BASE_URL}/rate_limit"
-
-        try:
-            response = self.session.get(url, headers=self.headers, timeout=self.timeout)
-            if response.status_code == 200:
-                return response.json()
-            else:
-                logger.warning(f"Failed to check rate limit: {response.status_code}")
-                return {}
-        except Exception as e:
-            logger.warning(f"Error checking rate limit: {e}")
-            return {}
-
     def _fetch_repo_description(self, repo: Dict[str, Any]) -> Optional[str]:
         """
         Fetch repository description from GitHub API for a single repository.
@@ -915,9 +887,15 @@ class GitHubClient:
             Repository description string, or None if not available or on error
         """
         url = f"{self.BASE_URL}/repos/{repo['owner']}/{repo['repo']}"
+        headers = {
+            "Accept": "application/vnd.github.v3.raw",
+            "User-Agent": "Context9/0.1.0",
+        }
+        if repo.get("github_token"):
+            headers["Authorization"] = f"token {repo.get('github_token')}"
 
         try:
-            response = self.session.get(url, headers=self.headers, timeout=self.timeout)
+            response = self.session.get(url, headers=headers, timeout=self.timeout)
 
             if response.status_code == 200:
                 repo_info = response.json()

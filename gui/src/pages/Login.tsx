@@ -59,7 +59,7 @@ export const Login: React.FC = () => {
       <div className="max-w-md w-full space-y-8 p-10 bg-white/95 backdrop-blur rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100">
         <div>
           <h2 className="text-center text-3xl font-extrabold text-gray-900 tracking-tight">
-            Context9 Admin Panel
+            Context9 Panel
           </h2>
           <p className="mt-2 text-center text-sm text-gray-500">Admin Login</p>
         </div>

@@ -60,7 +60,7 @@ class Repository(Base):
     repo = Column(String, nullable=False)
     branch = Column(String, nullable=False)
     root_spec_path = Column(String, default="spec.md")
-    github_token_encrypted = Column(Text, nullable=True)
+    github_token = Column(Text, nullable=True)
     github_token_created_at = Column(DateTime, nullable=True)
     github_token_updated_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=utc_now)

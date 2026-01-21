@@ -85,8 +85,11 @@ def main():
     """Main entry point for the MCP server."""
 
     args = parse_args()
-    yaml_config = read_config(args.config_file)
-    args.repos = yaml_config["repos"]
+    if args.config_file:
+        yaml_config = read_config(args.config_file)
+        args.repos = yaml_config["repos"]
+    else:
+        args.repos = None
     logger.info(f"Arguments: {args}")
     if args.enable_github_webhook:
         logger.info("GitHub webhook is enabled")
@@ -114,9 +117,6 @@ def main():
     logger.info("Initializing MCP server...")
     github_client, context9_mcp = initialize_mcp_server(args)
     logger.info("MCP server initialized")
-
-    # sync repositories from database
-    github_client.sync_database()
 
     # Create the MCP server as a Starlette app.
     mcp_app = context9_mcp.http_app(path="/")

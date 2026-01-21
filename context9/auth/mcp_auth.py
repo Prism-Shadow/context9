@@ -8,6 +8,12 @@ from loguru import logger
 
 from ..database import SessionLocal
 from ..database.models import ApiKey
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+CTX9_API_KEY = os.getenv("CTX9_API_KEY")
 
 
 class APIKeyMiddleware(BaseHTTPMiddleware):
@@ -103,14 +109,26 @@ class APIKeyMiddleware(BaseHTTPMiddleware):
                 },
             )
 
-        # Verify API key against database (compare with stored key_hash)
-        key_hash = hashlib.sha256(api_key_value.encode()).hexdigest()
-        db = SessionLocal()
-        try:
-            api_key_record = (
-                db.query(ApiKey).filter(ApiKey.key_hash == key_hash).first()
-            )
-            if not api_key_record:
+        if CTX9_API_KEY is None:
+            # Verify API key against database (compare with stored key_hash)
+            key_hash = hashlib.sha256(api_key_value.encode()).hexdigest()
+            db = SessionLocal()
+            try:
+                api_key_record = (
+                    db.query(ApiKey).filter(ApiKey.key_hash == key_hash).first()
+                )
+                if not api_key_record:
+                    logger.warning(
+                        f"Invalid API key provided in request to {request.url.path}"
+                    )
+                    return JSONResponse(
+                        status_code=status.HTTP_403_FORBIDDEN,
+                        content={"detail": "Invalid API key."},
+                    )
+            finally:
+                db.close()
+        else:
+            if api_key_value != CTX9_API_KEY:
                 logger.warning(
                     f"Invalid API key provided in request to {request.url.path}"
                 )
@@ -118,8 +136,6 @@ class APIKeyMiddleware(BaseHTTPMiddleware):
                     status_code=status.HTTP_403_FORBIDDEN,
                     content={"detail": "Invalid API key."},
                 )
-        finally:
-            db.close()
 
         # API key exists in database, proceed with the request
         logger.info(f"API key validated successfully for {request.url.path}")

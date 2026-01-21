@@ -1,3 +1,3 @@
-from .mcp_auth import APIKeyMiddleware
+from .auth_middleware import SelectiveAPIKeyMiddleware
 
-__all__ = ["APIKeyMiddleware"]
+__all__ = ["SelectiveAPIKeyMiddleware"]

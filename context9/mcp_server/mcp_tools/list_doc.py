@@ -5,7 +5,7 @@ from .. import mcp_server
 
 
 @context9_mcp.tool()
-def list_doc() -> list[dict[str, str]]:
+async def list_doc() -> list[dict[str, str]]:
     """
     Read documentation list managed by Context9.
 

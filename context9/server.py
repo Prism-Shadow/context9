@@ -22,6 +22,8 @@ from starlette.routing import Mount
 from .api import admin, api_keys, mcp_proxy, repositories
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 
 def parse_args():
     """Parse command line arguments."""
@@ -46,12 +48,6 @@ def parse_args():
         type=str,
         default=None,
         help="Config file path",
-    )
-    parser.add_argument(
-        "--port",
-        type=int,
-        default=8011,
-        help="Port to run the server on",
     )
 
     return parser.parse_args()
@@ -90,7 +86,11 @@ def main():
         args.repos = yaml_config["repos"]
     else:
         args.repos = None
+
+    load_dotenv()
+    args.port = os.getenv("PORT", 8011)
     logger.info(f"Arguments: {args}")
+
     if args.enable_github_webhook:
         logger.info("GitHub webhook is enabled")
     else:

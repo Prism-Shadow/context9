@@ -1,4 +1,4 @@
-from ..github_client import GitHubClientError, GitHubFileNotFoundError
+from ..client import GitHubClientError, GitHubFileNotFoundError
 from ..utils import parse_remotedoc_url, URLParseError
 from fastmcp.server.dependencies import get_http_headers
 

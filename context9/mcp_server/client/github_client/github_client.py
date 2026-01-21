@@ -22,9 +22,9 @@ from starlette.responses import JSONResponse
 from starlette import status
 from starlette.requests import Request
 import random
-from ..markdown import rewrite_relative_paths
-from ...database.database import SessionLocal
-from ...database.models import ApiKey, ApiKeyRepository, Repository
+from ...markdown import rewrite_relative_paths
+from ....database.database import SessionLocal
+from ....database.models import ApiKey, ApiKeyRepository, Repository
 
 
 class GitHubClientError(Exception):

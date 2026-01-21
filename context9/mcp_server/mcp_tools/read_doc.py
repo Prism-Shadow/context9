@@ -9,7 +9,7 @@ from .. import mcp_server
 
 
 @context9_mcp.tool()
-def read_doc(url: str) -> str:
+async def read_doc(url: str) -> str:
     """
     Read a document from GitHub using a remotedoc:// URL.
 

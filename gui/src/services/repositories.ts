@@ -5,7 +5,6 @@ import type {
   UpdateRepositoryRequest,
   CreateRepositoryResponse,
   PaginatedResponse,
-  SetGithubTokenRequest,
   SetGithubTokenResponse,
   VerifyGithubTokenResponse,
 } from '../utils/types';

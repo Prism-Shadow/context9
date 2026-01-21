@@ -17,6 +17,7 @@ from .database.init_db import initialize_database
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from starlette.applications import Starlette
 from starlette.routing import Mount
 from .api import admin, api_keys, mcp_proxy, repositories
@@ -88,7 +89,7 @@ def main():
         args.repos = None
 
     load_dotenv()
-    args.port = os.getenv("PORT", 8011)
+    args.port = int(os.getenv("CONTEXT9_PORT", 8011))
     logger.info(f"Arguments: {args}")
 
     if args.enable_github_webhook:
@@ -147,24 +148,45 @@ def main():
 
     # Mount frontend static files if they exist (production mode)
     # This must be after API routes to ensure API routes take precedence
-    gui_dist_path = Path(__file__).parent.parent.parent / "gui" / "dist"
+    gui_dist_path = Path(__file__).parent.parent / "gui" / "dist"
     if gui_dist_path.exists() and (gui_dist_path / "index.html").exists():
         logger.info(f"Serving frontend from {gui_dist_path}")
-        # Mount static files, but exclude /api routes
+        # Mount static files for /assets/*
         admin_app.mount(
-            "/", StaticFiles(directory=str(gui_dist_path), html=True), name="static"
+            "/assets",
+            StaticFiles(directory=str(gui_dist_path / "assets")),
+            name="assets",
         )
+
+        # Catch-all route for SPA - serves static files or index.html
+        # This must be the last route added
+        @admin_app.get("/{full_path:path}")
+        async def serve_spa(full_path: str):
+            """Serve static files or index.html for SPA routing"""
+            # Handle root path
+            if not full_path or full_path == "/":
+                return FileResponse(gui_dist_path / "index.html")
+
+            # If the path points to an actual file, serve it
+            file_path = gui_dist_path / full_path
+            if file_path.is_file():
+                return FileResponse(file_path)
+
+            # Otherwise return index.html for client-side routing
+            return FileResponse(gui_dist_path / "index.html")
     else:
         logger.info(
             "Frontend build not found, serving API only. Run 'npm run build' in gui/ to build frontend."
         )
 
     # Create main app that combines both.
+    app_routes = [
+        Mount("/api/mcp", app=mcp_app),
+        Mount("", app=admin_app),
+    ]
+
     app = Starlette(
-        routes=[
-            Mount("/api/mcp", app=mcp_app),
-            Mount("", app=admin_app),
-        ],
+        routes=app_routes,
         lifespan=mcp_app.lifespan,
     )
 

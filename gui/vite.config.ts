@@ -15,6 +15,7 @@ export default defineConfig(({ mode }) => {
   
   return {
     plugins: [react()],
+    base: '/', // Use root path for production
     resolve: {
       alias: {
         '@': fileURLToPath(new URL('./src', import.meta.url)),

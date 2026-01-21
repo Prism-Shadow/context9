@@ -12,6 +12,7 @@ examples/
 .github_cache/
 DEPLOYMENT.md
 deploy.sh
+benchmark/
 
 # Database
 **/*.db

@@ -6,12 +6,12 @@ import {
 } from '../services/apiKeys';
 import { getRepositories } from '../services/repositories';
 import { Button } from '../components/common/Button';
-import type { ApiKeyDetail, Repository } from '../utils/types';
+import type { ApiKeyDetail as ApiKeyDetailType, Repository } from '../utils/types';
 
 export const ApiKeyDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [apiKey, setApiKey] = useState<ApiKeyDetail | null>(null);
+  const [apiKey, setApiKey] = useState<ApiKeyDetailType | null>(null);
   const [allRepositories, setAllRepositories] = useState<Repository[]>([]);
   const [selectedRepoIds, setSelectedRepoIds] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);

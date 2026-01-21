@@ -1,4 +1,4 @@
-from .github_client import GitHubClient
+from .client import GitHubClient
 from loguru import logger
 import sys
 from .config import ConfigError

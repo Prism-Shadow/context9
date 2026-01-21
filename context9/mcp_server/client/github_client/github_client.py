@@ -26,6 +26,9 @@ from ...markdown import rewrite_relative_paths
 from ....database.database import SessionLocal
 from ....database.models import ApiKey, ApiKeyRepository, Repository
 
+from dotenv import load_dotenv
+import os
+
 
 class GitHubClientError(Exception):
     """Base exception for GitHub client errors."""
@@ -60,7 +63,7 @@ class GitHubClient:
 
     def __init__(
         self,
-        repos: List[Dict[str, Any]],
+        repos: Optional[List[Dict[str, Any]]] = None,
         timeout: int = 30,
         max_retries: int = 3,
         cache_dir: Optional[str] = None,
@@ -98,9 +101,8 @@ class GitHubClient:
             self.cache_dir = Path(cache_dir)
         self.cache_dir.mkdir(parents=True, exist_ok=True)
 
-        self.repos = []
-
-        # Create session with retry strategy (still needed for initial clone)
+        # Create session with retry strategy (must be initialized before _sync_database)
+        # as _sync_database may trigger methods that need self.session
         self.session = requests.Session()
         retry_strategy = Retry(
             total=max_retries,
@@ -112,7 +114,28 @@ class GitHubClient:
         self.session.mount("http://", adapter)
         self.session.mount("https://", adapter)
 
-    def sync_database(self):
+        self.repos = []
+
+        if repos is None:
+            logger.warning(
+                "repos parameter is not provided. Repositories will be loaded from database."
+            )
+            self._sync_database()
+            self.use_database = True
+        else:
+            logger.warning(
+                "repos parameter is provided. Repositories will be loaded from the parameter."
+            )
+            load_dotenv()
+            github_token = os.getenv("GITHUB_TOKEN")
+            if github_token is None:
+                raise ValueError("GITHUB_TOKEN is not set in the environment variables")
+            for repo in repos:
+                repo["github_token"] = github_token
+            self.repos = repos
+            self.use_database = False
+
+    def _sync_database(self):
         # Load repositories from database instead of using repos parameter
         # Note: repos parameter is kept for backward compatibility but not used
         logger.warning(
@@ -637,8 +660,10 @@ class GitHubClient:
     def list_doc(self, api_key: str) -> List[Dict[str, Any]]:
         """Get the list of documentation files."""
         results = []
-
-        repos = self.list_accessible_repositories(api_key)
+        if self.use_database:
+            repos = self.list_accessible_repositories(api_key)
+        else:
+            repos = self.repos
         logger.debug(f"Accessible repositories: {repos}")
         for repo in repos:
             results.append(
@@ -798,7 +823,9 @@ class GitHubClient:
                 f"Requested branch {branch} differs from cached branch {repo['branch']}. Using cached branch."
             )
 
-        if not self.can_access_repository(repo["owner"], repo["repo"], branch, api_key):
+        if self.use_database and not self.can_access_repository(
+            repo["owner"], repo["repo"], branch, api_key
+        ):
             raise GitHubAuthenticationError(
                 f"API key does not have access to repository {repo['owner']}/{repo['repo']}/{branch}"
             )

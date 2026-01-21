@@ -120,7 +120,10 @@ def main():
             if not args.frontend_only:
                 print(f"   Backend: http://localhost:{args.port}")
             if not args.backend_only:
-                print("   Frontend: http://localhost:3000")
+                import os
+
+                frontend_port = os.getenv("CONTEXT9_PANEL_PORT", "8012")
+                print(f"   Frontend: http://localhost:{frontend_port}")
             print("\nPress Ctrl+C to stop all servers")
 
         # Wait for all processes

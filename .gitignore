@@ -13,6 +13,7 @@ examples/
 DEPLOYMENT.md
 deploy.sh
 benchmark/
+docs/
 
 # Database
 **/*.db

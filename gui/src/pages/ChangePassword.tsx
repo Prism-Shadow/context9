@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useLocale } from '../contexts/LocaleContext';
 import { changePassword } from '../services/auth';
 import { Button } from '../components/common/Button';
 import { Input } from '../components/common/Input';
@@ -11,6 +12,7 @@ interface ChangePasswordFormData {
 }
 
 export const ChangePassword: React.FC = () => {
+  const { t } = useLocale();
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<string>('');
   const [loading, setLoading] = useState(false);
@@ -38,10 +40,10 @@ export const ChangePassword: React.FC = () => {
         current_password: data.current_password,
         new_password: data.new_password,
       });
-      setSuccess('Password changed successfully!');
+      setSuccess(t('changePassword.success'));
       reset();
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to change password, please check if the current password is correct');
+      setError(err.response?.data?.detail || t('changePassword.error'));
     } finally {
       setLoading(false);
     }
@@ -49,7 +51,7 @@ export const ChangePassword: React.FC = () => {
 
   return (
     <div className="min-h-[calc(100vh-7rem)] flex flex-col items-center justify-center">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Change Password</h1>
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">{t('changePassword.title')}</h1>
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-none border border-transparent dark:border-gray-700 p-6 max-w-md w-full">
         <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
           {error && (
@@ -64,9 +66,9 @@ export const ChangePassword: React.FC = () => {
           )}
           <div className="space-y-4">
             <Input
-              label="Current Password"
+              label={t('changePassword.currentPassword')}
               type="password"
-              {...register('current_password', { required: 'Current password is required' })}
+              {...register('current_password', { required: t('changePassword.currentRequired') })}
               error={
                 isSubmitted || touchedFields.current_password
                   ? errors.current_password?.message
@@ -74,13 +76,13 @@ export const ChangePassword: React.FC = () => {
               }
             />
             <Input
-              label="New Password"
+              label={t('changePassword.newPassword')}
               type="password"
               {...register('new_password', {
-                required: 'New password is required',
+                required: t('changePassword.newRequired'),
                 minLength: {
                   value: 6,
-                  message: 'New password must be at least 6 characters',
+                  message: t('changePassword.newMinLength'),
                 },
               })}
               error={
@@ -90,12 +92,12 @@ export const ChangePassword: React.FC = () => {
               }
             />
             <Input
-              label="Confirm New Password"
+              label={t('changePassword.confirmPassword')}
               type="password"
               {...register('confirm_password', {
-                required: 'Please confirm the new password',
+                required: t('changePassword.confirmRequired'),
                 validate: (value) =>
-                  value === newPassword || 'Passwords do not match',
+                  value === newPassword || t('changePassword.confirmMismatch'),
               })}
               error={
                 isSubmitted || touchedFields.confirm_password
@@ -111,7 +113,7 @@ export const ChangePassword: React.FC = () => {
               className="w-full"
               disabled={loading}
             >
-              {loading ? 'Changing...' : 'Change Password'}
+              {loading ? t('changePassword.submitting') : t('changePassword.submit')}
             </Button>
           </div>
         </form>

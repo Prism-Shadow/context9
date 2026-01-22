@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useLocale } from '../../contexts/LocaleContext';
 
 const SunIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -29,15 +30,17 @@ const SystemIcon = () => (
   </svg>
 );
 
-const labels: Record<string, string> = {
-  light: '浅色模式，点击切换',
-  dark: '深色模式，点击切换',
-  system: '跟随系统，点击切换',
-};
-
 export const ThemeToggle: React.FC<{ className?: string }> = ({ className = '' }) => {
   const { theme, cycleTheme } = useTheme();
+  const { t } = useLocale();
   const Icon = theme === 'light' ? SunIcon : theme === 'dark' ? MoonIcon : SystemIcon;
+  
+  const labels: Record<string, string> = {
+    light: t('theme.light'),
+    dark: t('theme.dark'),
+    system: t('theme.system'),
+  };
+  
   return (
     <button
       type="button"

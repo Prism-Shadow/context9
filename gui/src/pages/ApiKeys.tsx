@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
+import { useLocale } from '../contexts/LocaleContext';
 import {
   getApiKeys,
   createApiKey,
@@ -19,6 +20,7 @@ interface ApiKeyFormData {
 }
 
 export const ApiKeys: React.FC = () => {
+  const { t } = useLocale();
   const navigate = useNavigate();
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [loading, setLoading] = useState(true);
@@ -67,7 +69,7 @@ export const ApiKeys: React.FC = () => {
       setIsCreateModalOpen(false);
       await loadApiKeys();
     } catch (error: any) {
-      alert(error.response?.data?.detail || 'Failed to create');
+      alert(error.response?.data?.detail || t('apiKeys.createFailed'));
     }
   };
 
@@ -85,17 +87,17 @@ export const ApiKeys: React.FC = () => {
       setEditingKey(null);
       await loadApiKeys();
     } catch (error: any) {
-      alert(error.response?.data?.detail || 'Failed to update');
+      alert(error.response?.data?.detail || t('apiKeys.updateFailed'));
     }
   };
 
   const handleDelete = async (key: ApiKey) => {
-    if (!confirm(`Are you sure you want to delete API Key "${key.name}"?`)) return;
+    if (!confirm(`${t('apiKeys.confirmDelete')} "${key.name}"?`)) return;
     try {
       await deleteApiKey(key.id);
       await loadApiKeys();
     } catch (error: any) {
-      alert(error.response?.data?.detail || 'Failed to delete');
+      alert(error.response?.data?.detail || t('apiKeys.deleteFailed'));
     }
   };
 
@@ -104,28 +106,28 @@ export const ApiKeys: React.FC = () => {
   };
 
   const columns: Column<ApiKey>[] = [
-    { key: 'name', header: 'Name' },
+    { key: 'name', header: t('apiKeys.name') },
     {
       key: 'created_at',
-      header: 'Created At',
+      header: t('apiKeys.createdAt'),
       render: (item) => formatDate(item.created_at),
     },
     {
       key: 'repository_count',
-      header: 'Repositories',
+      header: t('apiKeys.repositories'),
       render: (item) => item.repository_count || 0,
     },
   ];
 
   if (loading) {
-    return <div className="text-center py-8 text-gray-500 dark:text-gray-400">Loading...</div>;
+    return <div className="text-center py-8 text-gray-500 dark:text-gray-400">{t('common.loading')}</div>;
   }
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">API Keys Management</h1>
-        <Button onClick={() => setIsCreateModalOpen(true)}>Create API Key</Button>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('apiKeys.title')}</h1>
+        <Button onClick={() => setIsCreateModalOpen(true)}>{t('apiKeys.create')}</Button>
       </div>
 
       {showNewKey && newKey && (
@@ -133,7 +135,7 @@ export const ApiKeys: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200 mb-1">
-                New API Key created, please save it securely (shown only once):
+                {t('apiKeys.newKeyMessage')}
               </p>
               <code className="text-sm text-yellow-900 dark:text-yellow-100 bg-yellow-100 dark:bg-yellow-900/40 px-2 py-1 rounded">
                 {newKey}
@@ -145,10 +147,10 @@ export const ApiKeys: React.FC = () => {
                 variant="secondary"
                 onClick={() => {
                   copyToClipboard(newKey);
-                  alert('Copied to clipboard');
+                  alert(t('apiKeys.copied'));
                 }}
               >
-                Copy
+                {t('apiKeys.copy')}
               </Button>
               <Button
                 size="sm"
@@ -158,7 +160,7 @@ export const ApiKeys: React.FC = () => {
                   setNewKey('');
                 }}
               >
-                Close
+                {t('common.close')}
               </Button>
             </div>
           </div>
@@ -175,7 +177,7 @@ export const ApiKeys: React.FC = () => {
             onClick={() => handleManagePermissions(item)}
             className="px-2.5 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
           >
-            Permissions
+            {t('apiKeys.permissions')}
           </button>
         )}
       />
@@ -183,13 +185,13 @@ export const ApiKeys: React.FC = () => {
       <Modal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
-        title="Create API Key"
+        title={t('apiKeys.create')}
         closeOnOverlayClick={false}
       >
         <form onSubmit={handleSubmitCreate(handleCreate)} className="space-y-4">
           <Input
-            label="Name"
-            {...registerCreate('name', { required: 'Name is required' })}
+            label={t('apiKeys.name')}
+            {...registerCreate('name', { required: t('apiKeys.nameRequired') })}
             error={errorsCreate.name?.message}
           />
           <div className="flex gap-2 justify-end">
@@ -198,10 +200,10 @@ export const ApiKeys: React.FC = () => {
               variant="secondary"
               onClick={() => setIsCreateModalOpen(false)}
             >
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button type="submit" variant="primary">
-              Create
+              {t('common.create')}
             </Button>
           </div>
         </form>
@@ -213,12 +215,12 @@ export const ApiKeys: React.FC = () => {
           setIsEditModalOpen(false);
           setEditingKey(null);
         }}
-        title="Edit API Key"
+        title={t('apiKeys.edit')}
       >
         <form onSubmit={handleSubmitEdit(handleUpdate)} className="space-y-4">
           <Input
-            label="Name"
-            {...registerEdit('name', { required: 'Name is required' })}
+            label={t('apiKeys.name')}
+            {...registerEdit('name', { required: t('apiKeys.nameRequired') })}
             error={errorsEdit.name?.message}
           />
           <div className="flex gap-2 justify-end">
@@ -230,10 +232,10 @@ export const ApiKeys: React.FC = () => {
                 setEditingKey(null);
               }}
             >
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button type="submit" variant="primary">
-              Save
+              {t('common.save')}
             </Button>
           </div>
         </form>

@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import { useLocale } from '../contexts/LocaleContext';
 import { getApiKeys } from '../services/apiKeys';
 import { getRepositories } from '../services/repositories';
 
 export const Dashboard: React.FC = () => {
+  const { t } = useLocale();
   const [stats, setStats] = useState({
     apiKeysCount: 0,
     repositoriesCount: 0,
@@ -33,21 +35,21 @@ export const Dashboard: React.FC = () => {
   if (stats.loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500 dark:text-gray-400">Loading...</div>
+        <div className="text-gray-500 dark:text-gray-400">{t('common.loading')}</div>
       </div>
     );
   }
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Dashboard</h1>
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">{t('dashboard.title')}</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-none border border-transparent dark:border-gray-700 p-6">
-          <h2 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">Total API Keys</h2>
+          <h2 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">{t('dashboard.totalApiKeys')}</h2>
           <p className="text-3xl font-bold text-primary-600 dark:text-primary-400">{stats.apiKeysCount}</p>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-none border border-transparent dark:border-gray-700 p-6">
-          <h2 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">Total Repositories</h2>
+          <h2 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">{t('dashboard.totalRepositories')}</h2>
           <p className="text-3xl font-bold text-primary-600 dark:text-primary-400">{stats.repositoriesCount}</p>
         </div>
       </div>

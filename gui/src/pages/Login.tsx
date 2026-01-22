@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '../contexts/AuthContext';
+import { useLocale } from '../contexts/LocaleContext';
 import { Button } from '../components/common/Button';
 import { Input } from '../components/common/Input';
 import { ThemeToggle } from '../components/common/ThemeToggle';
+import { LanguageToggle } from '../components/common/LanguageToggle';
 
 interface LoginFormData {
   username: string;
@@ -28,6 +30,7 @@ const EyeOffIcon = () => (
 export const Login: React.FC = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { t } = useLocale();
   const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -40,6 +43,10 @@ export const Login: React.FC = () => {
     mode: 'onSubmit',
     reValidateMode: 'onBlur',
     shouldFocusError: false,
+    defaultValues: {
+      username: '',
+      password: '',
+    },
   });
 
   const onSubmit = async (data: LoginFormData) => {
@@ -49,7 +56,7 @@ export const Login: React.FC = () => {
       await login(data.username, data.password);
       navigate('/dashboard');
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Login failed, please check your username and password');
+      setError(err.response?.data?.detail || t('login.error'));
     } finally {
       setLoading(false);
     }
@@ -57,13 +64,16 @@ export const Login: React.FC = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 via-primary-50/80 to-primary-100/60 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 relative">
-      <ThemeToggle className="absolute top-4 right-4 z-10" />
+      <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
+        <LanguageToggle />
+        <ThemeToggle />
+      </div>
       <div className="max-w-md w-full space-y-8 p-10 bg-white/95 dark:bg-gray-800/95 backdrop-blur rounded-2xl shadow-xl shadow-gray-200/50 dark:shadow-black/20 border border-gray-100 dark:border-gray-700">
         <div>
           <h2 className="text-center text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
-            Context9 Panel
+            {t('header.title')}
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-500 dark:text-gray-400">Admin Login</p>
+          <p className="mt-2 text-center text-sm text-gray-500 dark:text-gray-400">{t('login.title')}</p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
           {error && (
@@ -73,15 +83,15 @@ export const Login: React.FC = () => {
           )}
           <div className="space-y-4">
             <Input
-              label="Username"
+              label={t('login.username')}
               type="text"
-              {...register('username', { required: 'Username is required' })}
+              {...register('username', { required: t('login.username') + ' is required' })}
               error={isSubmitted || touchedFields.username ? errors.username?.message : undefined}
             />
             <Input
-              label="Password"
+              label={t('login.password')}
               type={showPassword ? 'text' : 'password'}
-              {...register('password', { required: 'Password is required' })}
+              {...register('password', { required: t('login.password') + ' is required' })}
               error={isSubmitted || touchedFields.password ? errors.password?.message : undefined}
               endAdornment={
                 <button
@@ -103,7 +113,7 @@ export const Login: React.FC = () => {
               className="w-full"
               disabled={loading}
             >
-              {loading ? 'Logging in...' : 'Login'}
+              {loading ? t('common.loading') : t('login.button')}
             </Button>
           </div>
         </form>

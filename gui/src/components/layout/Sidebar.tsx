@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { LayoutDashboard, Key, FolderGit2, Scan } from 'lucide-react';
+import { useLocale } from '../../contexts/LocaleContext';
 
 const GITHUB_URL = 'https://github.com/Prism-Shadow/context9';
 
@@ -11,11 +12,12 @@ const GitHubIcon = () => (
 );
 
 export const Sidebar: React.FC = () => {
+  const { t } = useLocale();
   const navItems = [
-    { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { path: '/api-keys', label: 'API Keys', icon: Key },
-    { path: '/repositories', label: 'Repositories', icon: FolderGit2 },
-    { path: '/inspector', label: 'MCP Inspector', icon: Scan },
+    { path: '/dashboard', label: t('sidebar.dashboard'), icon: LayoutDashboard },
+    { path: '/api-keys', label: t('sidebar.apiKeys'), icon: Key },
+    { path: '/repositories', label: t('sidebar.repositories'), icon: FolderGit2 },
+    { path: '/inspector', label: t('sidebar.inspector'), icon: Scan },
   ];
 
   return (

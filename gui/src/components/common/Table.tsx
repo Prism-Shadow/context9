@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLocale } from '../../contexts/LocaleContext';
 
 export interface Column<T> {
   key: string;
@@ -21,6 +22,7 @@ export function Table<T extends { id: number }>({
   onDelete,
   actions,
 }: TableProps<T>) {
+  const { t } = useLocale();
   return (
     <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
       <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -36,7 +38,7 @@ export function Table<T extends { id: number }>({
             ))}
             {(onEdit || onDelete || actions) && (
               <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                Actions
+                {t('common.actions')}
               </th>
             )}
           </tr>
@@ -48,7 +50,7 @@ export function Table<T extends { id: number }>({
                 colSpan={columns.length + (onEdit || onDelete || actions ? 1 : 0)}
                 className="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400"
               >
-                No data available
+                {t('common.noData')}
               </td>
             </tr>
           ) : (
@@ -71,7 +73,7 @@ export function Table<T extends { id: number }>({
                           onClick={() => onEdit(item)}
                           className="px-2.5 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
                         >
-                          Edit
+                          {t('common.edit')}
                         </button>
                       )}
                       {onEdit && onDelete && (
@@ -82,7 +84,7 @@ export function Table<T extends { id: number }>({
                           onClick={() => onDelete(item)}
                           className="px-2.5 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
                         >
-                          Delete
+                          {t('common.delete')}
                         </button>
                       )}
                     </div>

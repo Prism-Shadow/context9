@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import { useLocale } from '../contexts/LocaleContext';
 import { API_BASE_URL } from '../utils/constants';
 import {
   mcpInitialize,
@@ -139,10 +140,12 @@ function ToolForm({
   tool,
   onRun,
   running,
+  t,
 }: {
   tool: McpTool;
   onRun: (args: Record<string, unknown>) => void;
   running: boolean;
+  t: (key: string) => string;
 }) {
   const schema = tool.inputSchema || { type: 'object', properties: {}, required: [] };
   const props = schema.properties || {};
@@ -161,7 +164,7 @@ function ToolForm({
       const p = props[k];
       const raw = (values[k] ?? '').trim();
       if (required.has(k) && !raw) {
-        setErr(`"${k}" is required.`);
+        setErr(`"${k}" ${t('inspector.required')}`);
         return;
       }
       const val = parseSchemaValue(p?.type as string | undefined, raw);
@@ -230,11 +233,11 @@ function ToolForm({
         );
       })}
       {Object.keys(props).length === 0 && (
-        <p className="text-sm text-gray-500 dark:text-gray-400">No parameters.</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">{t('inspector.noParameters')}</p>
       )}
       {err && <p className="text-sm text-red-600 dark:text-red-400">{err}</p>}
       <Button onClick={handleRun} disabled={running} size="sm">
-        {running ? 'Running…' : 'Run'}
+        {running ? t('inspector.running') : t('inspector.run')}
       </Button>
     </div>
   );
@@ -270,6 +273,7 @@ function withBearerPrefix(v: string): string {
 }
 
 export const Inspector: React.FC = () => {
+  const { t } = useLocale();
   const [url, setUrl] = useState('');
   const [headers, setHeaders] = useState<McpHeader[]>(buildEmptyHeaders);
   const [visibleValueIndex, setVisibleValueIndex] = useState<number | null>(null);
@@ -365,31 +369,31 @@ export const Inspector: React.FC = () => {
 
   return (
     <div className="flex flex-col w-full max-w-full">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">MCP Inspector</h1>
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">{t('inspector.title')}</h1>
       <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-        Connect to Context9 HTTP MCP server: enter the URL and request headers (e.g. API Key). After connecting, you can list tools, fill in parameters, and test calls.
+        {t('inspector.intro')}
       </p>
 
       {/* Connection */}
       <section className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 mb-4 flex-shrink-0">
         <div className="flex items-center gap-2 mb-3">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Connection</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{t('inspector.connection')}</h2>
           {connected && (
             <span className="flex items-center gap-1.5 text-sm font-medium text-green-600 dark:text-green-400">
               <span className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" aria-hidden />
-              Connected
+              {t('inspector.connected')}
             </span>
           )}
           {connectError && !connected && (
             <span className="flex items-center gap-1.5 text-sm font-medium text-red-600 dark:text-red-400">
               <span className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0" aria-hidden />
-              Not connected
+              {t('inspector.notConnected')}
             </span>
           )}
         </div>
         <div className="space-y-3">
           <Input
-            label="MCP Server URL (Streamable HTTP)"
+            label={t('inspector.serverUrl')}
             type="url"
             value={url}
             onValueChange={setUrl}
@@ -398,10 +402,10 @@ export const Inspector: React.FC = () => {
           <div>
             <div className="flex items-center justify-between mb-1">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Request Headers (e.g. Authorization)
+                {t('inspector.requestHeaders')}
               </label>
               <Button type="button" variant="secondary" size="sm" onClick={addHeader}>
-                + Add
+                {t('inspector.addHeader')}
               </Button>
             </div>
             <div className="space-y-2">
@@ -410,7 +414,7 @@ export const Inspector: React.FC = () => {
                   <input
                     value={h.key}
                     onChange={(e) => updateHeader(i, 'key', e.target.value)}
-                    placeholder="Header name"
+                    placeholder={t('inspector.headerName')}
                     className="flex-1 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 text-sm"
                   />
                   <div className="flex-1 flex items-center gap-1 min-w-0">
@@ -420,15 +424,15 @@ export const Inspector: React.FC = () => {
                       onChange={(e) =>
                         updateHeader(i, 'value', e.target.value.replace(/^Bearer\s*/i, ''))
                       }
-                      placeholder="Bearer token or API key"
+                      placeholder={t('inspector.headerValue')}
                       className="flex-1 min-w-0 px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 text-sm"
                     />
                     <button
                       type="button"
                       onClick={() => toggleValueVisibility(i)}
                       className="p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 flex-shrink-0"
-                      aria-label={visibleValueIndex === i ? 'Hide value' : 'Show value'}
-                      title={visibleValueIndex === i ? 'Hide' : 'Show'}
+                      aria-label={visibleValueIndex === i ? t('inspector.hideValue') : t('inspector.showValue')}
+                      title={visibleValueIndex === i ? t('inspector.hide') : t('inspector.show')}
                     >
                       {visibleValueIndex === i ? (
                         <EyeOffIcon className="w-4 h-4" />
@@ -444,7 +448,7 @@ export const Inspector: React.FC = () => {
                     onClick={() => removeHeader(i)}
                     disabled={headers.length <= 1}
                   >
-                    Remove
+                    {t('inspector.remove')}
                   </Button>
                 </div>
               ))}
@@ -454,23 +458,23 @@ export const Inspector: React.FC = () => {
             {!connected ? (
               <Button onClick={handleConnect} disabled={connecting} className="inline-flex items-center gap-2">
                 <ConnectIcon className="w-4 h-4 flex-shrink-0" />
-                {connecting ? 'Connecting…' : 'Connect'}
+                {connecting ? t('inspector.connecting') : t('inspector.connect')}
               </Button>
             ) : (
               <>
                 <Button variant="secondary" onClick={handleReconnect} className="inline-flex items-center gap-2">
                   <ReconnectIcon className="w-4 h-4 flex-shrink-0" />
-                  Reconnect
+                  {t('inspector.reconnect')}
                 </Button>
                 <Button variant="secondary" onClick={handleDisconnect} className="inline-flex items-center gap-2">
                   <DisconnectIcon className="w-4 h-4 flex-shrink-0" />
-                  Disconnect
+                  {t('inspector.disconnect')}
                 </Button>
               </>
             )}
           </div>
           {connectError && (
-            <p className="text-sm text-red-600 dark:text-red-400">Connection failed: {connectError}</p>
+            <p className="text-sm text-red-600 dark:text-red-400">{t('inspector.connectionFailed')}: {connectError}</p>
           )}
         </div>
       </section>
@@ -480,10 +484,10 @@ export const Inspector: React.FC = () => {
         <section className="flex gap-4 mb-4">
           {/* Left: tool names in boxes */}
           <div className="w-[30%] min-w-0 flex flex-col">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Tools</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">{t('inspector.tools')}</h2>
             <div className="space-y-2 pr-2">
               {tools.length === 0 ? (
-                <p className="text-sm text-gray-500 dark:text-gray-400">No tools.</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{t('inspector.noTools')}</p>
               ) : (
                 tools.map((t) => (
                   <button
@@ -508,7 +512,7 @@ export const Inspector: React.FC = () => {
             <div className="h-10 flex-shrink-0" aria-hidden />
             <div className="flex-1 min-h-0 flex flex-col rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
             {!selectedTool ? (
-              <p className="text-sm text-gray-500 dark:text-gray-400">Click a tool on the left to view details and run it.</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{t('inspector.clickTool')}</p>
             ) : (
               <>
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex-shrink-0">
@@ -517,38 +521,39 @@ export const Inspector: React.FC = () => {
                 {/* Description */}
                 {selectedTool.description && (
                   <div className="mb-4 flex-shrink-0 min-w-0">
-                    <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</h3>
+                    <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('inspector.description')}</h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-line break-words">{selectedTool.description}</p>
                   </div>
                 )}
                 {/* Output Schema (optional in tools/list) */}
                 <div className="mb-4 flex-shrink-0 min-w-0">
-                  <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Output Schema</h3>
+                  <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('inspector.outputSchema')}</h3>
                   <div className="p-3 rounded-lg bg-gray-100 dark:bg-gray-700 text-xs font-mono overflow-x-auto whitespace-pre">
-                    <JsonHighlight data={selectedTool.outputSchema} fallback="Not provided by the server." />
+                    <JsonHighlight data={selectedTool.outputSchema} fallback={t('inspector.notProvided')} />
                   </div>
                 </div>
                 {/* Input Schema (parameters) */}
                 <div className="mb-4 flex-shrink-0 min-w-0">
-                  <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Input Schema</h3>
+                  <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('inspector.inputSchema')}</h3>
                   <div className="p-3 rounded-lg bg-gray-100 dark:bg-gray-700 text-xs font-mono overflow-x-auto whitespace-pre">
                     <JsonHighlight data={selectedTool.inputSchema || { type: 'object', properties: {}, required: [] }} fallback="{}" />
                   </div>
                 </div>
                 {/* Parameter inputs + Run button */}
                 <div className="mb-4 flex-shrink-0">
-                  <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Parameters & Run</h3>
+                  <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('inspector.parametersRun')}</h3>
                   <ToolForm
                     key={selectedTool.name}
                     tool={selectedTool}
                     onRun={(args) => handleRunTool(selectedTool.name, args)}
                     running={runningTool === selectedTool.name}
+                    t={t}
                   />
                 </div>
                 {/* Result: below form, only when we have result for this tool */}
                 {result && result.tool === selectedTool.name && (
                   <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600 flex-shrink-0">
-                    <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status</h3>
+                    <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('inspector.status')}</h3>
                     <span
                       className={`inline-block px-2 py-1 rounded text-sm font-medium ${
                         result.isError
@@ -556,9 +561,9 @@ export const Inspector: React.FC = () => {
                           : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
                       }`}
                     >
-                      {result.isError ? 'Failed' : 'Success'}
+                      {result.isError ? t('inspector.failed') : t('inspector.success')}
                     </span>
-                    <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mt-3 mb-2">Result</h3>
+                    <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mt-3 mb-2">{t('inspector.result')}</h3>
                     <pre
                       className={`p-3 rounded-lg overflow-x-auto text-sm font-mono whitespace-pre-wrap ${
                         result.isError

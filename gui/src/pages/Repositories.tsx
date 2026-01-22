@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useLocale } from '../contexts/LocaleContext';
 import {
   getRepositories,
   createRepository,
@@ -22,6 +23,7 @@ interface RepositoryFormData {
 }
 
 export const Repositories: React.FC = () => {
+  const { t } = useLocale();
   const [repositories, setRepositories] = useState<Repository[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -75,7 +77,7 @@ export const Repositories: React.FC = () => {
       setIsCreateModalOpen(false);
       await loadRepositories();
     } catch (error: any) {
-      alert(error.response?.data?.detail || 'Failed to create');
+      alert(error.response?.data?.detail || t('repositories.createFailed'));
     } finally {
       setIsSyncingModalOpen(false);
     }
@@ -107,46 +109,46 @@ export const Repositories: React.FC = () => {
       setEditingRepo(null);
       await loadRepositories();
     } catch (error: any) {
-      alert(error.response?.data?.detail || 'Failed to update');
+      alert(error.response?.data?.detail || t('repositories.updateFailed'));
     }
   };
 
   const handleDelete = async (repo: Repository) => {
-    if (!confirm(`Are you sure you want to delete repository "${repo.owner}/${repo.repo}"?`)) return;
+    if (!confirm(`${t('repositories.confirmDelete')} "${repo.owner}/${repo.repo}"?`)) return;
     try {
       await deleteRepository(repo.id);
       await loadRepositories();
     } catch (error: any) {
-      alert(error.response?.data?.detail || 'Failed to delete');
+      alert(error.response?.data?.detail || t('repositories.deleteFailed'));
     }
   };
 
   const columns: Column<Repository>[] = [
-    { key: 'owner', header: 'Owner' },
-    { key: 'repo', header: 'Repo' },
-    { key: 'branch', header: 'Branch' },
-    { key: 'root_spec_path', header: 'Root Spec Path' },
+    { key: 'owner', header: t('repositories.owner') },
+    { key: 'repo', header: t('repositories.repo') },
+    { key: 'branch', header: t('repositories.branch') },
+    { key: 'root_spec_path', header: t('repositories.rootSpecPath') },
     {
       key: 'has_github_token',
-      header: 'GitHub Token',
-      render: (item) => (item.has_github_token ? 'Configured' : 'Not Configured'),
+      header: t('repositories.githubToken'),
+      render: (item) => (item.has_github_token ? t('repositories.configured') : t('repositories.notConfigured')),
     },
     {
       key: 'created_at',
-      header: 'Created At',
+      header: t('repositories.createdAt'),
       render: (item) => formatDate(item.created_at),
     },
   ];
 
   if (loading) {
-    return <div className="text-center py-8 text-gray-500 dark:text-gray-400">Loading...</div>;
+    return <div className="text-center py-8 text-gray-500 dark:text-gray-400">{t('common.loading')}</div>;
   }
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Repository Management</h1>
-        <Button onClick={() => setIsCreateModalOpen(true)}>Add Repository</Button>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('repositories.title')}</h1>
+        <Button onClick={() => setIsCreateModalOpen(true)}>{t('repositories.add')}</Button>
       </div>
 
       <Table
@@ -159,33 +161,33 @@ export const Repositories: React.FC = () => {
       <Modal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
-        title="Create Repository"
+        title={t('repositories.create')}
         closeOnOverlayClick={false}
       >
         <form onSubmit={handleSubmitCreate(handleCreate)} className="space-y-4">
           <Input
-            label="Owner"
-            {...registerCreate('owner', { required: 'Owner is required' })}
+            label={t('repositories.owner')}
+            {...registerCreate('owner', { required: t('repositories.ownerRequired') })}
             error={errorsCreate.owner?.message}
           />
           <Input
-            label="Repo"
-            {...registerCreate('repo', { required: 'Repo is required' })}
+            label={t('repositories.repo')}
+            {...registerCreate('repo', { required: t('repositories.repoRequired') })}
             error={errorsCreate.repo?.message}
           />
           <Input
-            label="Branch"
-            {...registerCreate('branch', { required: 'Branch is required' })}
+            label={t('repositories.branch')}
+            {...registerCreate('branch', { required: t('repositories.branchRequired') })}
             error={errorsCreate.branch?.message}
           />
           <Input
-            label="Root Spec Path"
+            label={t('repositories.rootSpecPath')}
             {...registerCreate('root_spec_path')}
             placeholder="spec.md"
             error={errorsCreate.root_spec_path?.message}
           />
           <Input
-            label="GitHub Token (Optional)"
+            label={t('repositories.githubTokenOptional')}
             type={showToken ? 'text' : 'password'}
             {...registerCreate('github_token')}
             placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
@@ -197,7 +199,7 @@ export const Repositories: React.FC = () => {
               onClick={() => setShowToken(!showToken)}
               className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
             >
-              {showToken ? 'Hide' : 'Show'} Token
+              {showToken ? t('repositories.hideToken') : t('repositories.showToken')} Token
             </button>
           </div>
           <div className="flex gap-2 justify-end">
@@ -206,10 +208,10 @@ export const Repositories: React.FC = () => {
               variant="secondary"
               onClick={() => setIsCreateModalOpen(false)}
             >
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button type="submit" variant="primary">
-              Create
+              {t('common.create')}
             </Button>
           </div>
         </form>
@@ -244,7 +246,7 @@ export const Repositories: React.FC = () => {
               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
             />
           </svg>
-          <p className="text-gray-600 dark:text-gray-400">Syncing...</p>
+          <p className="text-gray-600 dark:text-gray-400">{t('repositories.syncing')}</p>
         </div>
       </Modal>
 
@@ -254,31 +256,31 @@ export const Repositories: React.FC = () => {
           setIsEditModalOpen(false);
           setEditingRepo(null);
         }}
-        title="Edit Repository"
+        title={t('repositories.edit')}
       >
         <form onSubmit={handleSubmitEdit(handleUpdate)} className="space-y-4">
           <Input
-            label="Owner"
-            {...registerEdit('owner', { required: 'Owner is required' })}
+            label={t('repositories.owner')}
+            {...registerEdit('owner', { required: t('repositories.ownerRequired') })}
             error={errorsEdit.owner?.message}
           />
           <Input
-            label="Repo"
-            {...registerEdit('repo', { required: 'Repo is required' })}
+            label={t('repositories.repo')}
+            {...registerEdit('repo', { required: t('repositories.repoRequired') })}
             error={errorsEdit.repo?.message}
           />
           <Input
-            label="Branch"
-            {...registerEdit('branch', { required: 'Branch is required' })}
+            label={t('repositories.branch')}
+            {...registerEdit('branch', { required: t('repositories.branchRequired') })}
             error={errorsEdit.branch?.message}
           />
           <Input
-            label="Root Spec Path"
+            label={t('repositories.rootSpecPath')}
             {...registerEdit('root_spec_path')}
             error={errorsEdit.root_spec_path?.message}
           />
           <Input
-            label="GitHub Token (Optional, leave empty to not update)"
+            label={t('repositories.githubTokenUpdate')}
             type={showToken ? 'text' : 'password'}
             {...registerEdit('github_token')}
             placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
@@ -290,7 +292,7 @@ export const Repositories: React.FC = () => {
               onClick={() => setShowToken(!showToken)}
               className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
             >
-              {showToken ? 'Hide' : 'Show'} Token
+              {showToken ? t('repositories.hideToken') : t('repositories.showToken')} Token
             </button>
           </div>
           <div className="flex gap-2 justify-end">
@@ -302,10 +304,10 @@ export const Repositories: React.FC = () => {
                 setEditingRepo(null);
               }}
             >
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button type="submit" variant="primary">
-              Save
+              {t('common.save')}
             </Button>
           </div>
         </form>

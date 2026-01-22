@@ -2,10 +2,13 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { ThemeToggle } from '../common/ThemeToggle';
+import { LanguageToggle } from '../common/LanguageToggle';
+import { useLocale } from '../../contexts/LocaleContext';
 import { User, KeyRound, LogOut } from 'lucide-react';
 
 export const Header: React.FC = () => {
   const { user, logout } = useAuth();
+  const { t } = useLocale();
   const navigate = useNavigate();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -41,9 +44,10 @@ export const Header: React.FC = () => {
     <header className="fixed top-0 left-0 right-0 z-20 h-16 bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
       <div className="px-6 h-full flex items-center justify-between">
         <div className="flex items-center">
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">Context9 Panel</h1>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white">{t('header.title')}</h1>
         </div>
         <div className="flex items-center gap-2">
+          <LanguageToggle />
           <ThemeToggle />
           {user && (
             <div className="relative" ref={dropdownRef}>
@@ -76,14 +80,14 @@ export const Header: React.FC = () => {
                     className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                   >
                     <KeyRound className="w-4 h-4" />
-                    <span>Change Password</span>
+                    <span>{t('header.changePassword')}</span>
                   </button>
                   <button
                     onClick={handleLogout}
                     className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                   >
                     <LogOut className="w-4 h-4" />
-                    <span>Logout</span>
+                    <span>{t('header.logout')}</span>
                   </button>
                 </div>
               )}

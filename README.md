@@ -167,7 +167,7 @@ Context9 provides two deployment methods, CLI and GUI. GUI method provide a no-c
 |:----:|--------|---------|
 | **1** | **Deploy Context9 CLI** | Start Context9 MCP service on your own server, see [CLI Deployment](#cli-deployment) |
 | **2** | **Integrate Context9 with Agent** | Connect Cursor / Claude Code, see [Integrate](#integrate-context9-with-agent) |
-| **3** | **Update Docs** | Enable agile development with up-to-date docs, see [Update](#work-with-context9) |
+| **3** | **Update Docs** | Let agents work with Context9, see [Update](#work-with-context9) |
 
 ### Use Context9 in GUI
 
@@ -175,7 +175,7 @@ Context9 provides two deployment methods, CLI and GUI. GUI method provide a no-c
 |:----:|--------|---------|
 | **1** | **Deploy Context9 GUI** | Start Context9 MCP service and GUI on your own server, see [GUI Deployment](#gui-deployment) |
 | **2** | **Integrate Context9 with Agent** | Connect Cursor / Claude Code, see [Integrate](#integrate-context9-with-agent) |
-| **3** | **Update Docs** | Enable agile development with up-to-date docs, see [Update](#work-with-context9) |
+| **3** | **Update Docs** | Let agents work with Context9, see [Update](#work-with-context9) |
 
 ## CLI Deployment
 

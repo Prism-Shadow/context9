@@ -1,7 +1,7 @@
 # Multi-stage build Dockerfile for Context9 MCP Server
 
 # Stage 1: Build stage
-FROM python:3.14-slim as builder
+FROM python:3.14-slim AS builder
 
 # Set working directory
 WORKDIR /build

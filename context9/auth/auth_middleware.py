@@ -45,5 +45,5 @@ class SelectiveAPIKeyMiddleware(APIKeyMiddleware):
 
         # Apply API key check only for MCP endpoints (/api/mcp/*)
         # All other /api/* paths should have been handled above
-        logger.info(f"Applying API key check for MCP endpoint: {path}")
+        logger.debug(f"Applying API key check for MCP endpoint: {path}")
         return await super().dispatch(request, call_next)

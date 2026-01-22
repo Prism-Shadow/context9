@@ -732,7 +732,7 @@ class GitHubClient:
                     "root_spec_path": r.root_spec_path or "spec.md",
                 }
             )
-        logger.info(
+        logger.debug(
             f"Listed {len(result)} repositories accessible by the given API key"
         )
         return result
@@ -822,7 +822,7 @@ class GitHubClient:
         # Construct local file path
         local_file_path = self.cache_dir / path
 
-        logger.info(f"Reading file from local cache: {local_file_path}")
+        logger.debug(f"Reading file from local cache: {local_file_path}")
 
         # If repository doesn't exist locally, sync first (outside lock to avoid deadlock)
         if not (self.cache_dir / path).exists():
@@ -857,16 +857,16 @@ class GitHubClient:
                 # Read file content
                 with open(local_file_path, "r", encoding="utf-8") as f:
                     content = f.read()
-                logger.info(
+                logger.debug(
                     f"Successfully read file from local cache: {path} ({len(content)} characters)"
                 )
 
                 current_path = path.split("/", maxsplit=3)[3]
-                logger.info(f"Current path: {current_path}")
+                logger.debug(f"Current path: {current_path}")
                 content = rewrite_relative_paths(
                     content, repo["owner"], repo["repo"], repo["branch"], current_path
                 )
-                logger.info("Successfully converted to Context9 remotedoc:// URLs")
+                logger.debug("Successfully converted to Context9 remotedoc:// URLs")
 
                 return content
 
@@ -916,7 +916,7 @@ class GitHubClient:
             if response.status_code == 200:
                 repo_info = response.json()
                 description = repo_info.get("description")
-                logger.info(
+                logger.debug(
                     f"Fetched description for {repo['owner']}/{repo['repo']}: {description}"
                 )
                 return description

@@ -32,11 +32,11 @@ async def list_doc() -> list[dict[str, str]]:
     if api_key and api_key.lower().startswith("bearer "):
         api_key = api_key[7:].strip()
 
-    logger.info(f"API key: {api_key}")
+    logger.debug(f"API key: {api_key}")
 
     if not mcp_server.github_client:
         raise ValueError("Server not initialized. Please check configuration.")
 
-    logger.info("Listing documentation...")
+    logger.debug("Listing documentation...")
 
     return mcp_server.github_client.list_doc(api_key)

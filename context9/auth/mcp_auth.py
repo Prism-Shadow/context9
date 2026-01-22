@@ -138,5 +138,5 @@ class APIKeyMiddleware(BaseHTTPMiddleware):
                 )
 
         # API key exists in database, proceed with the request
-        logger.info(f"API key validated successfully for {request.url.path}")
+        logger.debug(f"API key validated successfully for {request.url.path}")
         return await call_next(request)

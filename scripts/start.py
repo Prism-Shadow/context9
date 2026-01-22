@@ -68,6 +68,12 @@ def parse_args():
         action="store_true",
         help="Skip frontend build step (use existing build if available)",
     )
+    parser.add_argument(
+        "--log_level",
+        type=str,
+        default="INFO",
+        help="Log level",
+    )
 
     return parser.parse_args()
 
@@ -86,6 +92,9 @@ def build_server_command(args):
     else:
         # If webhook or sync_interval is not specified, default to sync_interval
         cmd.extend(["--github_sync_interval", "600"])
+
+    if args.log_level:
+        cmd.extend(["--log_level", args.log_level])
 
     return cmd
 

@@ -39,14 +39,14 @@ async def read_doc(url: str) -> str:
 
     try:
         # Parse the URL
-        logger.info(f"Parsing URL: {url}")
+        logger.debug(f"Parsing URL: {url}")
         file_path = parse_remotedoc_url(url)
-        logger.info(f"Resolved file path: {file_path}")
+        logger.debug(f"Resolved file path: {file_path}")
 
         # Read file from GitHub
         content = mcp_server.github_client.read_doc(file_path, api_key)
 
-        logger.info(
+        logger.debug(
             f"Successfully read document: {file_path} ({len(content)} characters)"
         )
         return content

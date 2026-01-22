@@ -24,6 +24,7 @@ from .api import admin, api_keys, mcp_proxy, repositories
 from pathlib import Path
 
 from dotenv import load_dotenv
+import sys
 
 
 def parse_args():
@@ -43,6 +44,12 @@ def parse_args():
         type=int,
         default=None,
         help="GitHub sync interval in seconds",
+    )
+    parser.add_argument(
+        "--log_level",
+        type=str,
+        default="INFO",
+        help="Log level",
     )
     parser.add_argument(
         "--config_file",
@@ -78,6 +85,12 @@ def read_config(config_file_path: str):
     return config
 
 
+def set_log_level(log_level: str):
+    """Set the log level for the logger."""
+    logger.remove()
+    logger.add(sys.stdout, level=log_level)
+
+
 def main():
     """Main entry point for the MCP server."""
 
@@ -88,7 +101,10 @@ def main():
     else:
         args.repos = None
 
+    set_log_level(args.log_level)
+
     load_dotenv()
+
     args.port = int(os.getenv("CONTEXT9_PORT", 8011))
     logger.info(f"Arguments: {args}")
 

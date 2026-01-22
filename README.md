@@ -473,5 +473,9 @@ As long as these links are valid within the repository, Context9 will:
 
 <br />
 
+## License
+
+Licensed under the Apache License, version 2.0. See [LICENSE](LICENSE) for details.
+
 ## ⭐ Star History
 [![Star History Chart](https://api.star-history.com/svg?repos=Prism-Shadow/context9&type=Date)](https://www.star-history.com/#Prism-Shadow/context9&Date)

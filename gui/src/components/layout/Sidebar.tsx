@@ -1,5 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import { LayoutDashboard, Key, FolderGit2, Scan } from 'lucide-react';
 
 const GITHUB_URL = 'https://github.com/Prism-Shadow/context9';
 
@@ -11,32 +12,36 @@ const GitHubIcon = () => (
 
 export const Sidebar: React.FC = () => {
   const navItems = [
-    { path: '/dashboard', label: 'Dashboard' },
-    { path: '/api-keys', label: 'API Keys' },
-    { path: '/repositories', label: 'Repositories' },
-    { path: '/inspector', label: 'MCP Inspector' },
+    { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { path: '/api-keys', label: 'API Keys', icon: Key },
+    { path: '/repositories', label: 'Repositories', icon: FolderGit2 },
+    { path: '/inspector', label: 'MCP Inspector', icon: Scan },
   ];
 
   return (
     <aside className="fixed left-0 top-16 z-10 w-64 h-[calc(100vh-4rem)] flex flex-col bg-white dark:bg-gray-800 shadow-sm border-r border-gray-200 dark:border-gray-700">
       <nav className="p-4 flex-1 min-h-0 overflow-y-auto">
         <ul className="space-y-2">
-          {navItems.map((item) => (
-            <li key={item.path}>
-              <NavLink
-                to={item.path}
-                className={({ isActive }) =>
-                  `block px-4 py-2 rounded-lg transition-colors ${
-                    isActive
-                      ? 'bg-primary-100 dark:bg-primary-600/30 text-primary-700 dark:text-primary-100 font-medium'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                  }`
-                }
-              >
-                {item.label}
-              </NavLink>
-            </li>
-          ))}
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <li key={item.path}>
+                <NavLink
+                  to={item.path}
+                  className={({ isActive }) =>
+                    `flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${
+                      isActive
+                        ? 'bg-primary-100 dark:bg-primary-600/30 text-primary-700 dark:text-primary-100 font-medium'
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    }`
+                  }
+                >
+                  <Icon className="w-5 h-5 flex-shrink-0" />
+                  <span>{item.label}</span>
+                </NavLink>
+              </li>
+            );
+          })}
         </ul>
       </nav>
       <div className="p-4 flex justify-center items-center border-t border-gray-100 dark:border-gray-700 flex-shrink-0">

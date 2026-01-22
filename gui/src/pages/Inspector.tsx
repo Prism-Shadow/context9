@@ -1,6 +1,5 @@
 import React, { useState, useCallback } from 'react';
 import { useLocale } from '../contexts/LocaleContext';
-import { API_BASE_URL } from '../utils/constants';
 import {
   mcpInitialize,
   mcpSendInitialized,
@@ -112,7 +111,7 @@ function JsonHighlight({ data, fallback }: { data: unknown; fallback: string }) 
   );
 }
 
-const CONTEXT9_MCP_EXAMPLE = `${API_BASE_URL}/api/mcp/`;
+const DEFAULT_MCP_SERVER_URL = 'http://localhost:8011/api/mcp/';
 
 function buildEmptyHeaders(): McpHeader[] {
   return [{ key: 'Authorization', value: '' }];
@@ -274,7 +273,7 @@ function withBearerPrefix(v: string): string {
 
 export const Inspector: React.FC = () => {
   const { t } = useLocale();
-  const [url, setUrl] = useState('');
+  const [url, setUrl] = useState(DEFAULT_MCP_SERVER_URL);
   const [headers, setHeaders] = useState<McpHeader[]>(buildEmptyHeaders);
   const [visibleValueIndex, setVisibleValueIndex] = useState<number | null>(null);
   const [connecting, setConnecting] = useState(false);
@@ -288,7 +287,7 @@ export const Inspector: React.FC = () => {
   );
   const [selectedTool, setSelectedTool] = useState<McpTool | null>(null);
 
-  const baseUrl = (url || CONTEXT9_MCP_EXAMPLE).trim() || CONTEXT9_MCP_EXAMPLE;
+  const baseUrl = (url || DEFAULT_MCP_SERVER_URL).trim() || DEFAULT_MCP_SERVER_URL;
   const userHeaders = headers
     .filter((h) => (h.key || '').trim())
     .map((h) => ({ key: (h.key || '').trim(), value: withBearerPrefix(h.value || '') }));
@@ -397,7 +396,7 @@ export const Inspector: React.FC = () => {
             type="url"
             value={url}
             onValueChange={setUrl}
-            placeholder={CONTEXT9_MCP_EXAMPLE}
+            placeholder={DEFAULT_MCP_SERVER_URL}
           />
           <div>
             <div className="flex items-center justify-between mb-1">

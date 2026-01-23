@@ -6,7 +6,7 @@ import { dirname, resolve } from 'path'
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
-  // Get the project root directory (parent of gui directory)
+  // Get the project root directory (parent of web directory)
   const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
   
   // Load env file from project root directory.

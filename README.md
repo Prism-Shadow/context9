@@ -1,15 +1,14 @@
 ![Cover](public/context9.png)
 
-# Context9 - Sync your knowledge to a live, agent-ready local MCP server
+# Context9 - Bring Living Knowledge into Your AI Context
 
 <div align="center">
-  <h2>Bring Living Knowledge into Your AI Context</h2>
   <p><b>Secure</b> &middot; <b>Open-source</b> &middot; <b>Fully Under Your Control</b></p>
 </div>
 
 <div align="center">
 
-**[Website](TODO)** · **[X](TODO)** · **[Discord](TODO)** · **[Issues](TODO)**
+**[Website](https://prismshadow.com/)** · **[X](https://x.com/prismshadow_ai)** · **[Discord](https://discord.gg/4TQ2bsSb)** · **[Issues](https://github.com/Prism-Shadow/context9/issues)**
 
 </div>
 
@@ -40,12 +39,12 @@
 
 ## 🚀 What Context9 Actually Does
 
-**Context9 (Context Mine)** is an MCP (Model Context Protocol) server designed for modern development teams, enabling AI assistants and code agents to securely and timely access documentation while maintaining full privacy control. 
+**Context9 (Context Mine)** is an MCP (Model Context Protocol) server designed for modern development teams, enabling AI agents to securely and timely access documentation while maintaining full privacy control. 
 
 Context9 provides an easy-to-use graphical user interface (GUI) that includes a complete MCP workflow, MCP testing, and access control, enabling deployment in large teams for multi-project collaboration.
 
 
-Simply add `use context9` to your prompt, or let rules handle automatic invocation.
+Simply add `use context9` to your prompt, or add rules for automatic invocation.
 
 ```text
 With Context9, inspect the newly added frontend APIs in the team, implement the corresponding backend endpoints, and verify them with tests.
@@ -66,15 +65,15 @@ uv run python scripts/start.py --github_sync_interval 600
 uv run python scripts/start.py --github_sync_interval 60
 ```
 
-Once started, open the GUI at: `http://<Context9_url>:8011/`
+Once started, open the Web interface at: `http://<Context9_url>:8011/`
 
 #### Launch Context9 GUI with Docker
 
-You can also run the GUI deployment using Docker. Context9 provides a ready-to-use [Dockerfile](docker/Dockerfile-gui).
+You can also run the Web deployment using Docker. Context9 provides a ready-to-use [Dockerfile](docker/Dockerfile).
 
 ```shell
 # Build docker image
-docker build -f docker/Dockerfile-gui -t context9-gui:latest .
+docker build -f docker/Dockerfile -t context9-gui:latest .
 
 # Run docker container
 docker run -d \

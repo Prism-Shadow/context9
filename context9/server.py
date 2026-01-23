@@ -164,13 +164,13 @@ def main():
 
     # Mount frontend static files if they exist (production mode)
     # This must be after API routes to ensure API routes take precedence
-    gui_dist_path = Path(__file__).parent.parent / "gui" / "dist"
-    if gui_dist_path.exists() and (gui_dist_path / "index.html").exists():
-        logger.info(f"Serving frontend from {gui_dist_path}")
+    web_dist_path = Path(__file__).parent.parent / "web" / "dist"
+    if web_dist_path.exists() and (web_dist_path / "index.html").exists():
+        logger.info(f"Serving frontend from {web_dist_path}")
         # Mount static files for /assets/*
         admin_app.mount(
             "/assets",
-            StaticFiles(directory=str(gui_dist_path / "assets")),
+            StaticFiles(directory=str(web_dist_path / "assets")),
             name="assets",
         )
 
@@ -181,18 +181,18 @@ def main():
             """Serve static files or index.html for SPA routing"""
             # Handle root path
             if not full_path or full_path == "/":
-                return FileResponse(gui_dist_path / "index.html")
+                return FileResponse(web_dist_path / "index.html")
 
             # If the path points to an actual file, serve it
-            file_path = gui_dist_path / full_path
+            file_path = web_dist_path / full_path
             if file_path.is_file():
                 return FileResponse(file_path)
 
             # Otherwise return index.html for client-side routing
-            return FileResponse(gui_dist_path / "index.html")
+            return FileResponse(web_dist_path / "index.html")
     else:
         logger.info(
-            "Frontend build not found, serving API only. Run 'npm run build' in gui/ to build frontend."
+            "Frontend build not found, serving API only. Run 'npm run build' in web/ to build frontend."
         )
 
     # Create main app that combines both.

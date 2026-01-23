@@ -4,16 +4,16 @@
 # Stage 1: Build frontend
 FROM node:20-slim AS frontend-builder
 
-WORKDIR /build/gui
+WORKDIR /build/web
 
 # Copy frontend package files
-COPY gui/package*.json ./
+COPY web/package*.json ./
 
 # Install frontend dependencies
 RUN npm ci
 
 # Copy frontend source code
-COPY gui/ ./
+COPY web/ ./
 
 # Build frontend for production
 # Set VITE_API_BASE_URL to empty string for production mode
@@ -62,7 +62,7 @@ COPY context9/ ./context9/
 COPY pyproject.toml ./
 
 # Copy built frontend from frontend-builder stage
-COPY --from=frontend-builder /build/gui/dist ./gui/dist
+COPY --from=frontend-builder /build/web/dist ./web/dist
 
 # Copy startup script (optional, for convenience)
 COPY scripts/start.py ./scripts/start.py
@@ -90,7 +90,7 @@ ENV PYTHONUNBUFFERED=1 \
 
 # Default startup command
 # Frontend is already built in the frontend-builder stage, so we directly start the backend server
-# The backend server will serve both API and frontend static files from gui/dist
+# The backend server will serve both API and frontend static files from web/dist
 # 
 # Usage examples:
 # 1. Recommended: Using --env-file to load environment variables:

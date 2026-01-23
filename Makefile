@@ -40,5 +40,5 @@ dev-frontend:
 # Build frontend for production
 build-frontend:
 	@echo "Building frontend for production..."
-	@cd gui && npm run build
+	@cd web && npm run build
 	@echo "Frontend built! Now backend will serve static files automatically."

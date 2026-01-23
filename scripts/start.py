@@ -19,7 +19,7 @@ from dotenv import load_dotenv
 
 # Get project root directory
 PROJECT_ROOT = Path(__file__).parent.parent
-GUI_DIR = PROJECT_ROOT / "gui"
+WEB_DIR = PROJECT_ROOT / "web"
 
 
 def parse_args():
@@ -108,7 +108,7 @@ def build_frontend():
     env["VITE_API_BASE_URL"] = ""  # Use relative paths in production
     result = subprocess.run(
         ["npm", "run", "build"],
-        cwd=GUI_DIR,
+        cwd=WEB_DIR,
         env=env,
         check=False,
     )
@@ -119,7 +119,7 @@ def build_frontend():
 
 def check_frontend_build():
     """Check if frontend build exists"""
-    dist_path = GUI_DIR / "dist"
+    dist_path = WEB_DIR / "dist"
     index_path = dist_path / "index.html"
     return dist_path.exists() and index_path.exists()
 

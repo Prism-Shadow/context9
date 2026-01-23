@@ -1,14 +1,14 @@
 ![Cover](public/context9.png)
 
-# Context9 - Bring Living Knowledge into Your AI Context
+# Context9 - Bring Live Doc into Your AI Context
 
 <div align="center">
-  <p><b>Secure</b> &middot; <b>Open-source</b> &middot; <b>Fully Under Your Control</b></p>
+  <p><b>Up-to-date</b> &middot; <b>Local-first</b> &middot; <b>Low-hallucination</b></p>
 </div>
 
 <div align="center">
 
-**[Website](https://prismshadow.com/)** · **[X](https://x.com/prismshadow_ai)** · **[Discord](https://discord.gg/4TQ2bsSb)** · **[Issues](https://github.com/Prism-Shadow/context9/issues)**
+**[X](https://x.com/prismshadow_ai)** · **[Discord](https://discord.gg/4TQ2bsSb)** · **[Issues](https://github.com/Prism-Shadow/context9/issues)**
 
 </div>
 
@@ -30,49 +30,258 @@
 
 ---
 
+https://github.com/user-attachments/assets/1caa1934-6826-4f2b-b708-93b3407718e3
+
 ## Why Context9?
 
-- 🔐 Secure: Fully open sourced and deploy in your own server, safely access your private knowledge.
-- 🎯 Focus: Real-time knowledge synchronization and reduce AI agent hallucinations.
-- ⚙️ Zero-code: Easily manage your repositories and configure API-key access permissions through the Context9 GUI Panel.
+- 🎯 Up-to-date knowledge: Real-time knowledge synchronization and reduce AI agent hallucinations.
+- 🔐 Local-first: Fully open sourced and deploy on your own server, safely access your private knowledge.
+- ⚙️ Easy-to-use Web UI: Easily manage your repositories and API-key permissions through the Context9 Panel.
 
 
-## 🚀 What Context9 Actually Does
+## What Context9 Actually Does
 
-**Context9 (Context Mine)** is an MCP (Model Context Protocol) server designed for modern development teams, enabling AI agents to securely and timely access documentation while maintaining full privacy control. 
-
-Context9 provides an easy-to-use graphical user interface (GUI) that includes a complete MCP workflow, MCP testing, and access control, enabling deployment in large teams for multi-project collaboration.
+**Context9 (Context Mine)** is an MCP (Model Context Protocol) server. With local deployment, Context9 securely feeds agents with the most up-to-date documentation, reducing LLM hallucinations.
 
 
-Simply add `use context9` to your prompt, or add rules for automatic invocation.
+<div style="text-align: center;">
+  <img src="public/overview.png" alt="overview" style="width: 60%; height: auto;">
+</div>
 
-```text
-With Context9, inspect the newly added frontend APIs in the team, implement the corresponding backend endpoints, and verify them with tests.
-```
-
-```text
-Deploy the latest version of the backend server following the documentation with Context9.
-```
 
 ## Install Context9
 
+### Run Context9 server
+
 ```shell
-# Build frontend and start backend (serves GUI + API on the same port)
-# Server is running on port 8011, visit http://<Context9_url>:8011/
+docker run -d \
+    --name context9 \
+    -p 8011:8011 \
+    --restart unless-stopped \
+    ghcr.io/prism-shadow/context9:latest \
+    python -m context9.server --github_sync_interval 600
+```
+
+Or you can specify the port on which Context9 runs.
+
+```shell
+docker run -d \
+    --name context9 \
+    -e CONTEXT9_PORT=<port> \
+    -p <port>:<port> \
+    --restart unless-stopped \
+    ghcr.io/prism-shadow/context9:latest \
+    python -m context9.server --github_sync_interval 600
+```
+
+## Configure Context9
+
+### Login to Context9
+
+Visit `http://<server_ip>:8011/` to login to Context9
+
+- Default username: `ctx9-admin`
+- Default password: `88888888`
+
+Remember to change the default password when you first log in to Context9.
+
+![login](public/login.png)
+
+
+### Add repositories
+
+Add the repositories you need in Context9 by filling in the repository owner, repository name, and branch.
+- For private repositories, you also need to provide a [GitHub Token](https://github.com/settings/personal-access-tokens)
+
+![repo](public/repo.png)
+
+### Add API Keys
+
+Generate an API key that can be used to access Context9.
+
+![api_key](public/api_key.png)
+
+After generating the API key, you need to configure which repositories the API key is allowed to access.
+
+![key2repo](public/key2repo.png)
+
+### Test Context9 (Optional)
+
+You can test your configured Context9 instance by simply entering the current Context9 Server IP and API key in the MCP Inspector.
+
+![inspector](public/inspector.png)
+
+
+## Integrate Context9 with Agent
+
+After deploying the Context9 service, you can seamlessly integrate both private and public real-time code documentation into your agents. You can connect to the Context9 MCP service using tools such as Cursor and Claude Code.
+
+### Install in Cursor
+
+Go to: `Settings` ->`Cursor Settings` -> `Tools & MCP` -> `Add a Custom MCP Server`
+
+Paste the configuration below into `~/.cursor/mcp.json`. If you want to configure Context9 for a specific project only, create `.cursor/mcp.json` in the project directory and paste the configuration there.
+
+```json
+{
+  "mcpServers": {
+    "Context9": {
+      "url": "http://<server_ip>:8011/api/mcp/",
+      "headers": {
+        "Authorization": "Bearer <CTX9_API_KEY>"
+      }
+    }
+  }
+}
+```
+
+
+### Install in Claude Code
+Run the following command to add Context9 to Claude Code.
+
+```shell
+claude mcp add --transport http Context9 http://<server_ip>:8011/api/mcp/ --header "Authorization: Bearer <CTX9_API_KEY>"
+```
+
+
+### Suggestions for Context9 Usage
+
+To avoid adding extra prompts every time you use Context9, we recommend that you:
+
+
+- Use `CLAUDE.md` in Claude Code.
+- Use `AGENTS.md` for Cursor, CodeX and other agents.
+- Add rules in Cursor.
+
+#### Use `CLAUDE.md` for Claude Code
+
+Add a prompt to CLAUDE.md to enable Context9:
+
+```
+- Always retrieve required documentation via Context9
+```
+
+#### Use `AGENT.md` for Cursor, CodeX and other agents
+
+Add rules to AGENTS.md, for example:
+
+```text
+Rules:
+- Always retrieve required documentation via Context9
+```
+
+#### Add Rule for Cursor
+
+Go to: `Setting` -> `Rules and Commands` -> `Add Rule`
+
+Rule example:
+
+```text
+Always use Context9 MCP to obtain the necessary documentation, regardless of whether I explicitly ask for it.
+```
+
+## Work with Context9
+
+### Set up entry documentation
+
+To enable Context9 to correctly discover and index your repository documentation, each repository should provide a Spec document.
+By default, Context9 expects a file named spec.md at the root of the repository.
+
+```text
+your-repo/
+├── spec.md          ← Specification entry point
+├── README.md
+├── docs/
+│   └── ...
+└── ...
+```
+
+> If you need to use a different filename or path, remember to update the repository configuration.
+
+
+### Use relative link in documentation
+
+You do not need to think about MCP, indexing, or document resolution. Just maintain documentation links using normal repository-relative paths, exactly as you would for human readers.
+
+Example in documentation.
+
+```markdown
+## Related Documents
+- [Detailed Guide](docs/detailed-guide.md)
+- [API Reference](guides/api-reference.md)
+- [FAQ](faq.md)
+```
+
+As long as these links are valid within the repository, Context9 will:
+
+- Discover the documents
+- Index them correctly
+- Make them available to AI agents in real time
+
+
+## Deploy Context9 from source
+<details>
+<summary>Expand</summary>
+
+<h3>GUI Deployment</h3>
+
+<p><strong>Requirements</strong></p>
+
+<ul>
+<li>Python >= 3.10</li>
+<li>Node.js >= 18</li>
+<li>Repository access (public or with authentication token)</li>
+</ul>
+
+<h4>Clone Context9 repository</h4>
+
+<pre><code class="language-shell">git clone https://github.com/Prism-Shadow/context9.git && cd context9
+</code></pre>
+
+<h4>Set up python environment</h4>
+
+<pre><code class="language-shell"># Install the package
+uv sync
+
+# Or install with development dependencies
+uv sync --dev
+</code></pre>
+
+<h4>Install frontend dependencies</h4>
+
+<pre><code class="language-shell">cd gui
+npm install
+cd ..
+</code></pre>
+
+<h4>Configure Environment</h4>
+
+<p>Set the following environment variables (create a <code>.env</code> file, see <a href=".env_example">.env example</a> or export them directly):</p>
+
+<ul>
+<li><code>CONTEXT9_PORT</code> (Optional): Specifies the port number on which the Context9 service runs. Defaults to 8011.</li>
+</ul>
+
+<pre><code class="language-env">CONTEXT9_PORT=xxxx
+</code></pre>
+
+<h4>Build GUI and launch server</h4>
+
+<pre><code class="language-shell"># Build frontend and start backend (serves GUI + API on the same port)
+# Server is running on port 8011, visit http://&lt;server_ip&gt;:8011/
 uv run python scripts/start.py --github_sync_interval 600
 
 # Update repos every 60 seconds
 uv run python scripts/start.py --github_sync_interval 60
-```
+</code></pre>
 
-Once started, open the Web interface at: `http://<Context9_url>:8011/`
+<p>Once started, open the GUI at: <code>http://&lt;server_ip&gt;:8011/</code></p>
 
-#### Launch Context9 GUI with Docker
+<h4>Launch Context9 GUI with Docker</h4>
 
-You can also run the Web deployment using Docker. Context9 provides a ready-to-use [Dockerfile](docker/Dockerfile).
+<p>You can also run the GUI deployment using Docker. Context9 provides a ready-to-use <a href="docker/Dockerfile">Dockerfile</a>.</p>
 
-```shell
-# Build docker image
+<pre><code class="language-shell"># Build docker image
 docker build -f docker/Dockerfile -t context9-gui:latest .
 
 # Run docker container
@@ -83,71 +292,42 @@ docker run -d \
     --restart unless-stopped \
     context9-gui:latest \
     python -m context9.server --github_sync_interval 600
-```
+</code></pre>
 
-The GUI and API are served from the same port. Open `http://<Context9_url>:8011/` in your browser.
+<p>The GUI and API are served from the same port. Open <code>http://&lt;server_ip&gt;:8011/</code> in your browser.</p>
 
-The default login username is `ctx9-admin`, and the default password is `88888888`. Change passward when you login to Context9.
+<p>The default login username is <code>ctx9-admin</code>, and the default password is <code>88888888</code>. Change password when you login to Context9.</p>
 
+<h3>CLI Deployment</h3>
 
-## How to use it
+<p><strong>Requirements</strong></p>
 
+<ul>
+<li>Python >= 3.10</li>
+<li>Repository access (public or with authentication token)</li>
+<li>Optional: Webhook setup for event-based updates</li>
+</ul>
 
-Context9 provides two deployment methods, CLI and GUI. GUI method provide a no-code way to configure repositories and API keys. 
+<h4>Clone Context9 repository</h4>
 
-- CLI method: Suitable for individual users or teams that do not need to frequently change repository configurations
-- GUI method: Suitable for large team deployments that require complex permission control and frequent repository configuration changes
+<pre><code class="language-shell">git clone https://github.com/Prism-Shadow/context9.git && cd context9
+</code></pre>
 
-### Use Context9 in CLI
+<h4>Set up python environment</h4>
 
-| Step | Action | Details |
-|:----:|--------|---------|
-| **1** | **Deploy Context9 CLI** | Start Context9 MCP service on your own server, see [CLI Deployment](#cli-deployment) |
-| **2** | **Integrate Context9 with Agent** | Connect Cursor / Claude Code, see [Integrate](#integrate-context9-with-agent) |
-| **3** | **Update Docs** | Let agents work with Context9, see [Update](#work-with-context9) |
-
-### Use Context9 in GUI
-
-| Step | Action | Details |
-|:----:|--------|---------|
-| **1** | **Deploy Context9 GUI** | Start Context9 MCP service and GUI on your own server, see [GUI Deployment](#gui-deployment) |
-| **2** | **Integrate Context9 with Agent** | Connect Cursor / Claude Code, see [Integrate](#integrate-context9-with-agent) |
-| **3** | **Update Docs** | Let agents work with Context9, see [Update](#work-with-context9) |
-
-## CLI Deployment
-
-### Requirements
-
-- Python >= 3.10
-- Repository access (public or with authentication token)
-- Optional: Webhook setup for event-based updates
-
-### Deploy Context9 on server
-
-#### Clone Context9 repository
-
-```shell
-git clone https://github.com/Prism-Shadow/context9.git && cd context9
-```
-
-
-#### Set up python environment
-
-```shell
-# Install the package
+<pre><code class="language-shell"># Install the package
 uv sync
 
 # Or install with development dependencies
 uv sync --dev
-```
+</code></pre>
 
-#### Configure repository
+<h4>Configure repository</h4>
 
-Configure the repositories you need in `config.yaml` (private & public repositories)
+<p>Configure the repositories you need in <code>config.yaml</code> (private &amp; public repositories)</p>
 
-An example of `config.yaml` file. [config example](config_example.yaml)
-```yaml
-# config.yaml
+<p>An example of <code>config.yaml</code> file. <a href="config_example.yaml">config example</a></p>
+<pre><code class="language-yaml"># config.yaml
 repos:
 # Private Repo 1
   - owner: OwnerName
@@ -163,13 +343,13 @@ repos:
     repo: sglang
     branch: main
     root_spec_path: README.md
-```
+</code></pre>
 
-You can include both private and public repositories.
+<p>You can include both private and public repositories.</p>
 
 <details>
 <summary><b>Configure public repos</b></summary>
-Simply specify the repository owner, name, and branch in <code>config.yaml</code>.
+<p>Simply specify the repository owner, name, and branch in <code>config.yaml</code>.</p>
 </details>
 
 <details>
@@ -189,27 +369,27 @@ Simply specify the repository owner, name, and branch in <code>config.yaml</code
 
 </details>
 
-#### Configure Environment
+<h4>Configure Environment</h4>
 
-Set the following environment variables (create a `.env` file or export them directly):
-* `CTX9_API_KEY` (Required): API key used for server authentication to access private resources. **Specified by an administrator. Keep it random and confidential.**
-* `GITHUB_TOKEN` (Optional): Required when configuring private repositories in `config.yaml`. This is not limited to a GitHub personal access token—any organization-issued repository access token is supported, as long as it conforms to the GitHub API specification.
-* `CONTEXT9_PORT` (Optional): Specifies the port number on which the Context9 MCP service runs. If not specified, it defaults to 8011.
+<p>Set the following environment variables (create a <code>.env</code> file or export them directly):</p>
+<ul>
+<li><code>CTX9_API_KEY</code> (Required): API key used for server authentication to access private resources. <strong>Specified by an administrator. Keep it random and confidential.</strong></li>
+<li><code>GITHUB_TOKEN</code> (Optional): Required when configuring private repositories in <code>config.yaml</code>. This is not limited to a GitHub personal access token—any organization-issued repository access token is supported, as long as it conforms to the GitHub API specification.</li>
+<li><code>CONTEXT9_PORT</code> (Optional): Specifies the port number on which the Context9 MCP service runs. If not specified, it defaults to 8011.</li>
+</ul>
 
-An example of `.env` file. [.env example](.env_example)
+<p>An example of <code>.env</code> file. <a href=".env_example">.env example</a></p>
 
-```env
-GITHUB_TOKEN=github_token
+<pre><code class="language-env">GITHUB_TOKEN=github_token
 CTX9_API_KEY=XXXXXXXXXXXXXXXX
 
 # Optional
 CONTEXT9_PORT=8080
-```
+</code></pre>
 
-#### Launch Context9 server
+<h4>Launch Context9 server</h4>
 
-```shell
-# Default:
+<pre><code class="language-shell"># Default:
 # Sync repos every 600 seconds (10 minutes)
 # Run server on port 8011
 uv run python -m context9.server --config_file config.yaml
@@ -219,16 +399,15 @@ uv run python -m context9.server --github_sync_interval 60 --config_file config.
 
 # Run server on port 8080 (or define CONTEXT9_PORT in .env)
 CONTEXT9_PORT=8080 uv run python -m context9.server --config_file config.yaml
-```
+</code></pre>
 
-#### Launch Context9 Server with Docker
+<h4>Launch Context9 Server with Docker</h4>
 
-You can also run Context9 using Docker. Context9 provides a ready-to-use [Dockerfile](docker/Dockerfile-cli).
+<p>You can also run Context9 using Docker. Context9 provides a ready-to-use <a href="docker/Dockerfile-cli">Dockerfile</a>.</p>
 
-The `config.yaml` file is included in the Docker image during the build process, so there is no need to provide it again when starting the container.
+<p>The <code>config.yaml</code> file is included in the Docker image during the build process, so there is no need to provide it again when starting the container.</p>
 
-```shell
-# Build docker image
+<pre><code class="language-shell"># Build docker image
 docker build -f docker/Dockerfile-cli -t context9:latest .
 
 # Run docker container
@@ -239,176 +418,11 @@ docker run -d \
     --env-file .env \
     --restart unless-stopped \
     context9:latest
-```
-
-## GUI Delopyment
-
-### Requirements
-
-- Python >= 3.10
-- Node.js >= 18
-- Repository access (public or with authentication token)
-
-### Deploy Context9 GUI on server
-
-#### Clone Context9 repository
-
-```shell
-git clone https://github.com/Prism-Shadow/context9.git && cd context9
-```
-
-#### Set up python environment
-
-```shell
-# Install the package
-uv sync
-
-# Or install with development dependencies
-uv sync --dev
-```
-
-#### Install frontend dependencies
-
-```shell
-cd gui
-npm install
-cd ..
-```
-
-#### Configure Environment
-
-Set the following environment variables (create a `.env` file, see [.env example](.env_example) or export them directly):
-
-* `CONTEXT9_PORT` (Optional): Specifies the port number on which the Context9 service runs. Defaults to 8011.
-
-```env
-CONTEXT9_PORT=xxxx
-```
-
-#### Build GUI and launch server
-
-```shell
-# Build frontend and start backend (serves GUI + API on the same port)
-# Server is running on port 8011, visit http://<Context9_url>:8011/
-uv run python scripts/start.py --github_sync_interval 600
-
-# Update repos every 60 seconds
-uv run python scripts/start.py --github_sync_interval 60
-```
-
-Once started, open the GUI at: `http://<Context9_url>:8011/`
-
-#### Launch Context9 GUI with Docker
-
-You can also run the GUI deployment using Docker. Context9 provides a ready-to-use [Dockerfile](docker/Dockerfile-gui).
-
-```shell
-# Build docker image
-docker build -f docker/Dockerfile-gui -t context9-gui:latest .
-
-# Run docker container
-docker run -d \
-    --name context9-gui \
-    -p 8011:8011 \
-    --env-file .env \
-    --restart unless-stopped \
-    context9-gui:latest \
-    python -m context9.server --github_sync_interval 600
-```
-
-The GUI and API are served from the same port. Open `http://<Context9_url>:8011/` in your browser.
-
-The default login username is `ctx9-admin`, and the default password is `88888888`. Change passward when you login to Context9.
-
-#### Add repositories and API keys
-
-Context9-GUI provides a no-code way to configure repositories and API keys, and it can apply different access controls for different API keys. Please log in to the Context9 GUI to configure them.
-
-#### Test the configured MCP services
-
-Context9-GUI includes an MCP Inspector that lets users test each MCP service for an API key in place. In the Sidebar, enter the following in the MCP Inspector, connect to Context9, and run tool tests:
-
-- Context9 URL
-- API key
-
-## Integrate Context9 with Agent
-
-After deploying the Context9 service, you can seamlessly integrate both private and public real-time code documentation into your agents. You can connect to the Context9 MCP service using tools such as Cursor and Claude Code.
-
-<details>
-<summary><b>Install in Cursor</b></summary>
-Go to: <code>Settings</code> -> <code>Cursor Settings</code> -> <code>Tools & MCP</code> -> <code>Add a Custom MCP Server</code>
-
-Paste the configuration below into `~/.cursor/mcp.json`. If you want to configure Context9 for a specific project only, create `.cursor/mcp.json` in the project directory and paste the configuration there.
-
-```json
-{
-  "mcpServers": {
-    "Context9": {
-      "url": "<Context9_url>:8011/api/mcp/",
-      "headers": {
-        "Authorization": "Bearer <CTX9_API_KEY in .env>"
-      }
-    }
-  }
-}
-```
-</details>
-
-<details>
-<summary><b>Install in Claude Code</b></summary>
-Run the following command to add Context9 to Claude Code.
-
-```shell
-claude mcp add --transport http Context9 <Context9_url>:8011/api/mcp/ --header "Authorization: Bearer <CTX9_API_KEY in .env>"
-```
-</details>
-
-## Work with Context9
-
-
-<details>
-<summary><b>1. Set up entry documentation</b></summary>
-To enable Context9 to correctly discover and index your repository documentation, each repository should provide a Spec document.
-By default, Context9 expects a file named spec.md at the root of the repository.
-<pre><code>
-your-repo/
-├── spec.md          ← Specification entry point
-├── README.md
-├── docs/
-│   └── ...
-└── ...
 </code></pre>
 
-<blockquote>
-If you need to use a different filename or path, coordinate with the Context9 administrator to update the repository configuration.
-</blockquote>
-
 </details>
 
-<details>
-<summary><b>2. Use relative link of other doc</b></summary>
 
-You do not need to think about MCP, indexing, or document resolution. Just maintain documentation links using normal repository-relative paths, exactly as you would for human readers.
-
-Example in documentation.
-
-```markdown
-## Related Documents
-- [Detailed Guide](docs/detailed-guide.md)
-- [API Reference](guides/api-reference.md)
-- [FAQ](faq.md)
-```
-
-As long as these links are valid within the repository, Context9 will:
-
-- Discover the documents
-- Index them correctly
-- Make them available to AI agents in real time
-
-</details>
-
-<br />
 
 ## License
 

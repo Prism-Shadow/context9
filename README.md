@@ -20,127 +20,29 @@
 
 </div>
 
+<div align="center">
+
 [![简体中文](https://img.shields.io/badge/docs-简体中文-orange)](./docs/README.zh-CN.md)
 [![繁體中文](https://img.shields.io/badge/docs-繁體中文-darkorange)](./docs/README.zh-TW.md)
 [![日本語](https://img.shields.io/badge/docs-日本語-red)](./docs/README.ja.md)
 [![한국어 문서](https://img.shields.io/badge/docs-한국어-darkred)](./docs/README.ko.md)
-[![Documentación en Español](https://img.shields.io/badge/docs-Español-blue)](./docs/README.es.md)
-[![Documentation en Français](https://img.shields.io/badge/docs-Français-royalblue)](./docs/README.fr.md)
-[![Documentação em Português (Brasil)](https://img.shields.io/badge/docs-Português%20(Brasil)-purple)](./docs/README.pt-BR.md)
-[![Documentazione in italiano](https://img.shields.io/badge/docs-Italian-indigo)](./docs/README.it.md)
-[![Dokumentation auf Deutsch](https://img.shields.io/badge/docs-Deutsch-darkgreen)](./docs/README.de.md)
-[![Документация на русском языке](https://img.shields.io/badge/docs-Русский-navy)](./docs/README.ru.md)
-[![Українська документація](https://img.shields.io/badge/docs-Українська-steelblue)](./docs/README.uk.md)
-[![Türkçe Doküman](https://img.shields.io/badge/docs-Türkçe-teal)](./docs/README.tr.md)
-[![Dokumentasi Bahasa Indonesia](https://img.shields.io/badge/docs-Bahasa%20Indonesia-cadetblue)](./docs/README.id-ID.md)
-[![Arabic Documentation](https://img.shields.io/badge/docs-Arabic-black)](./docs/README.ar.md)
-[![Tiếng Việt](https://img.shields.io/badge/docs-Tiếng%20Việt-darkcyan)](./docs/README.vi.md)
+
+</div>
 
 ---
 
-## What makes Context9 unique
+## Why Context9?
 
-<table>
-<tr>
-<td width="50%" valign="top" align="center">
-<h3>❌ Without Context9</h3>
-<div align="left">
-<ul>
-  <li>❌ Uses outdated docs and examples</li>
-  <li>❌ Private knowledge is hard to access and easy to leak</li>
-</ul>
-</div>
-</td>
+- 🔐 Secure: Fully open sourced and deploy in your own server, safely access your private knowledge.
+- 🎯 Focus: Real-time knowledge synchronization and reduce AI agent hallucinations.
+- ⚙️ Zero-code: Easily manage your repositories and configure API-key access permissions through the Context9 GUI Panel.
 
-<td width="50%" valign="top" align="center">
-<h3>✅ With Context9</h3>
-<div align="left">
-<ul>
-  <li>✅ Always uses the latest docs from real repos</li>
-  <li>✅ Secure access to both private and public docs</li>
-</ul>
-</div>
-</td>
-</tr>
-
-<tr>
-<td width="50%" valign="top" align="center">
-<h3>🔒 It runs locally</h3>
-<div align="left">
-<ul>
-  <li>Your code and docs stay inside your server</li>
-  <li>No cloud dependency or extra sync overhead</li>
-</ul>
-</div>
-</td>
-
-<td width="50%" valign="top" align="center">
-<h3>🎯 It keeps agents focused</h3>
-<div align="left">
-<ul>
-  <li>Only relevant repositories are included in context</li>
-  <li>Smaller context, fewer hallucinations</li>
-</ul>
-</div>
-</td>
-</tr>
-</table>
 
 ## 🚀 What Context9 Actually Does
 
 **Context9 (Context Mine)** is an MCP (Model Context Protocol) server designed for modern development teams, enabling AI assistants and code agents to securely and timely access documentation while maintaining full privacy control. 
 
 Context9 provides an easy-to-use graphical user interface (GUI) that includes a complete MCP workflow, MCP testing, and access control, enabling deployment in large teams for multi-project collaboration.
-
-<table>
-  <tr>
-    <td width="33%" valign="top">
-      <h3>📚 Live Docs</h3>
-      <div>
-        <p>Always reads the latest docs from real repos</p>
-        <p>No stale examples</p>
-      </div>
-    </td>
-    <td width="33%" valign="top">
-      <h3>🔐 Local &amp; Private</h3>
-      <div>
-        <p>Runs inside your own environment</p>
-        <p>No public infrastructure</p>
-      </div>
-    </td>
-    <td width="33%" valign="top">
-      <h3>🧠 Focused Context</h3>
-      <div>
-        <p>Feeds agents only relevant information</p>
-        <p>Less context, fewer hallucinations</p>
-      </div>
-    </td>
-  </tr>
-
-  <tr>
-    <td width="33%" valign="top">
-      <h3>🎯 Scoped Access</h3>
-      <div>
-        <p>Only the repos you configure</p>
-        <p>Private and public supported</p>
-      </div>
-    </td>
-    <td width="33%" valign="top">
-      <h3>🔌 MCP Native</h3>
-      <div>
-        <p>Works out of the box with MCP agents</p>
-        <p>No plugins or hacks</p>
-      </div>
-    </td>
-    <td width="33%" valign="top">
-      <h3>🛠 You’re in Control</h3>
-      <div>
-        <p>Approve access, see logs, stop anytime</p>
-        <p>Your infra, your rules</p>
-      </div>
-    </td>
-  </tr>
-</table>
 
 
 Simply add `use context9` to your prompt, or let rules handle automatic invocation.
@@ -152,6 +54,42 @@ With Context9, inspect the newly added frontend APIs in the team, implement the 
 ```text
 Deploy the latest version of the backend server following the documentation with Context9.
 ```
+
+## Install Context9
+
+```shell
+# Build frontend and start backend (serves GUI + API on the same port)
+# Server is running on port 8011, visit http://<Context9_url>:8011/
+uv run python scripts/start.py --github_sync_interval 600
+
+# Update repos every 60 seconds
+uv run python scripts/start.py --github_sync_interval 60
+```
+
+Once started, open the GUI at: `http://<Context9_url>:8011/`
+
+#### Launch Context9 GUI with Docker
+
+You can also run the GUI deployment using Docker. Context9 provides a ready-to-use [Dockerfile](docker/Dockerfile-gui).
+
+```shell
+# Build docker image
+docker build -f docker/Dockerfile-gui -t context9-gui:latest .
+
+# Run docker container
+docker run -d \
+    --name context9-gui \
+    -p 8011:8011 \
+    --env-file .env \
+    --restart unless-stopped \
+    context9-gui:latest \
+    python -m context9.server --github_sync_interval 600
+```
+
+The GUI and API are served from the same port. Open `http://<Context9_url>:8011/` in your browser.
+
+The default login username is `ctx9-admin`, and the default password is `88888888`. Change passward when you login to Context9.
+
 
 ## How to use it
 

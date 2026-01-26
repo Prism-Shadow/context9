@@ -54,6 +54,8 @@ export default {
     'apiKeys.createFailed': 'Не удалось создать',
     'apiKeys.updateFailed': 'Не удалось обновить',
     'apiKeys.deleteFailed': 'Не удалось удалить',
+    'apiKeys.selectAll': 'Выбрать все',
+    'apiKeys.deselectAll': 'Снять выделение',
     
     // Repositories
     'repositories.title': 'Управление репозиториями',
@@ -74,6 +76,9 @@ export default {
     'repositories.syncing': 'Синхронизация...',
     'repositories.showToken': 'Показать',
     'repositories.hideToken': 'Скрыть',
+    'repositories.githubUrl': 'URL GitHub',
+    'repositories.parse': 'Разобрать',
+    'repositories.invalidGitHubUrl': 'Неверный URL GitHub',
     'repositories.ownerRequired': 'Владелец обязателен',
     'repositories.repoRequired': 'Имя репозитория обязательно',
     'repositories.branchRequired': 'Ветка обязательна',

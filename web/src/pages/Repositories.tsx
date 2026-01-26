@@ -11,7 +11,7 @@ import { Table, Column } from '../components/common/Table';
 import { Modal } from '../components/common/Modal';
 import { Button } from '../components/common/Button';
 import { Input } from '../components/common/Input';
-import { formatDate } from '../utils/helpers';
+import { formatDate, parseGitHubUrl } from '../utils/helpers';
 import type { Repository, CreateRepositoryRequest, UpdateRepositoryRequest } from '../utils/types';
 
 interface RepositoryFormData {
@@ -31,12 +31,14 @@ export const Repositories: React.FC = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingRepo, setEditingRepo] = useState<Repository | null>(null);
   const [showToken, setShowToken] = useState(false);
+  const [githubUrl, setGithubUrl] = useState('');
 
   const {
     register: registerCreate,
     handleSubmit: handleSubmitCreate,
     formState: { errors: errorsCreate },
     reset: resetCreate,
+    setValue: setValueCreate,
   } = useForm<RepositoryFormData>();
 
   const {
@@ -74,6 +76,7 @@ export const Repositories: React.FC = () => {
       };
       await createRepository(request);
       resetCreate();
+      setGithubUrl('');
       setIsCreateModalOpen(false);
       await loadRepositories();
     } catch (error: any) {
@@ -123,6 +126,28 @@ export const Repositories: React.FC = () => {
     }
   };
 
+  const handleParseGitHubUrl = () => {
+    const parsed = parseGitHubUrl(githubUrl);
+    if (!parsed) {
+      alert(t('repositories.invalidGitHubUrl'));
+      return;
+    }
+
+    // Set form values
+    setValueCreate('owner', parsed.owner);
+    setValueCreate('repo', parsed.repo);
+    
+    // Only set branch if it was detected
+    if (parsed.branch) {
+      setValueCreate('branch', parsed.branch);
+    }
+    
+    // Only set root_spec_path if it was detected
+    if (parsed.rootSpecPath) {
+      setValueCreate('root_spec_path', parsed.rootSpecPath);
+    }
+  };
+
   const columns: Column<Repository>[] = [
     { key: 'owner', header: t('repositories.owner') },
     { key: 'repo', header: t('repositories.repo') },
@@ -160,11 +185,36 @@ export const Repositories: React.FC = () => {
 
       <Modal
         isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
+        onClose={() => {
+          setIsCreateModalOpen(false);
+          setGithubUrl('');
+        }}
         title={t('repositories.create')}
         closeOnOverlayClick={false}
       >
         <form onSubmit={handleSubmitCreate(handleCreate)} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              {t('repositories.githubUrl')}
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={githubUrl}
+                onChange={(e) => setGithubUrl(e.target.value)}
+                placeholder="https://github.com/owner/repo"
+                className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              />
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={handleParseGitHubUrl}
+              >
+                {t('repositories.parse')}
+              </Button>
+            </div>
+          </div>
           <Input
             label={t('repositories.owner')}
             {...registerCreate('owner', { required: t('repositories.ownerRequired') })}

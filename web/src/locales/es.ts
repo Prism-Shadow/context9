@@ -54,6 +54,8 @@ export default {
     'apiKeys.createFailed': 'Error al crear',
     'apiKeys.updateFailed': 'Error al actualizar',
     'apiKeys.deleteFailed': 'Error al eliminar',
+    'apiKeys.selectAll': 'Seleccionar todo',
+    'apiKeys.deselectAll': 'Deseleccionar todo',
     
     // Repositories
     'repositories.title': 'Gestión de repositorios',
@@ -74,6 +76,9 @@ export default {
     'repositories.syncing': 'Sincronizando...',
     'repositories.showToken': 'Mostrar',
     'repositories.hideToken': 'Ocultar',
+    'repositories.githubUrl': 'URL de GitHub',
+    'repositories.parse': 'Analizar',
+    'repositories.invalidGitHubUrl': 'URL de GitHub inválida',
     'repositories.ownerRequired': 'El propietario es obligatorio',
     'repositories.repoRequired': 'El nombre del repositorio es obligatorio',
     'repositories.branchRequired': 'La rama es obligatoria',

@@ -54,6 +54,8 @@ export default {
     'apiKeys.createFailed': '생성에 실패했습니다',
     'apiKeys.updateFailed': '업데이트에 실패했습니다',
     'apiKeys.deleteFailed': '삭제에 실패했습니다',
+    'apiKeys.selectAll': '전체 선택',
+    'apiKeys.deselectAll': '전체 해제',
     
     // Repositories
     'repositories.title': '리포지토리 관리',
@@ -74,6 +76,9 @@ export default {
     'repositories.syncing': '동기화 중...',
     'repositories.showToken': '표시',
     'repositories.hideToken': '숨기기',
+    'repositories.githubUrl': 'GitHub URL',
+    'repositories.parse': '구문 분석',
+    'repositories.invalidGitHubUrl': '잘못된 GitHub URL',
     'repositories.ownerRequired': '소유자는 필수입니다',
     'repositories.repoRequired': '리포지토리 이름은 필수입니다',
     'repositories.branchRequired': '브랜치는 필수입니다',

@@ -54,6 +54,8 @@ export default {
     'apiKeys.createFailed': 'فشل الإنشاء',
     'apiKeys.updateFailed': 'فشل التحديث',
     'apiKeys.deleteFailed': 'فشل الحذف',
+    'apiKeys.selectAll': 'تحديد الكل',
+    'apiKeys.deselectAll': 'إلغاء تحديد الكل',
     
     // Repositories
     'repositories.title': 'إدارة المستودعات',
@@ -74,6 +76,9 @@ export default {
     'repositories.syncing': 'جارٍ المزامنة...',
     'repositories.showToken': 'إظهار',
     'repositories.hideToken': 'إخفاء',
+    'repositories.githubUrl': 'رابط GitHub',
+    'repositories.parse': 'تحليل',
+    'repositories.invalidGitHubUrl': 'رابط GitHub غير صالح',
     'repositories.ownerRequired': 'المالك مطلوب',
     'repositories.repoRequired': 'اسم المستودع مطلوب',
     'repositories.branchRequired': 'الفرع مطلوب',

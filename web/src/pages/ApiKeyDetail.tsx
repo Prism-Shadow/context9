@@ -6,9 +6,11 @@ import {
 } from '../services/apiKeys';
 import { getRepositories } from '../services/repositories';
 import { Button } from '../components/common/Button';
+import { useLocale } from '../contexts/LocaleContext';
 import type { ApiKeyDetail as ApiKeyDetailType, Repository } from '../utils/types';
 
 export const ApiKeyDetail: React.FC = () => {
+  const { t } = useLocale();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [apiKey, setApiKey] = useState<ApiKeyDetailType | null>(null);
@@ -47,6 +49,16 @@ export const ApiKeyDetail: React.FC = () => {
         ? prev.filter((id) => id !== repoId)
         : [...prev, repoId]
     );
+  };
+
+  const handleSelectAll = () => {
+    if (selectedRepoIds.length === allRepositories.length) {
+      // 如果已全选，则全不选
+      setSelectedRepoIds([]);
+    } else {
+      // 否则全选
+      setSelectedRepoIds(allRepositories.map((repo) => repo.id));
+    }
   };
 
   const handleSave = async () => {
@@ -106,9 +118,20 @@ export const ApiKeyDetail: React.FC = () => {
 
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow dark:shadow-none border border-transparent dark:border-gray-700 p-6">
         <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Repository Permissions</h2>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
           Select repositories that this API Key can access:
         </p>
+        {allRepositories.length > 0 && (
+          <div className="mb-4">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handleSelectAll}
+            >
+              {selectedRepoIds.length === allRepositories.length ? t('apiKeys.deselectAll') : t('apiKeys.selectAll')}
+            </Button>
+          </div>
+        )}
         <div className="space-y-2">
           {allRepositories.map((repo) => (
             <label

@@ -54,6 +54,8 @@ export default {
     'apiKeys.createFailed': '作成に失敗しました',
     'apiKeys.updateFailed': '更新に失敗しました',
     'apiKeys.deleteFailed': '削除に失敗しました',
+    'apiKeys.selectAll': 'すべて選択',
+    'apiKeys.deselectAll': 'すべて解除',
     
     // Repositories
     'repositories.title': 'リポジトリ管理',
@@ -74,6 +76,9 @@ export default {
     'repositories.syncing': '同期中...',
     'repositories.showToken': '表示',
     'repositories.hideToken': '非表示',
+    'repositories.githubUrl': 'GitHub URL',
+    'repositories.parse': '解析',
+    'repositories.invalidGitHubUrl': '無効なGitHub URL',
     'repositories.ownerRequired': 'オーナーは必須です',
     'repositories.repoRequired': 'リポジトリ名は必須です',
     'repositories.branchRequired': 'ブランチは必須です',

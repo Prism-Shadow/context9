@@ -44,8 +44,8 @@ def ensure_default_admin_exists():
             logger.warning(
                 "No admin users found in database. Creating default admin..."
             )
-            admin_username = os.getenv("CONTEXT9_ADMIN_USERNAME", "admin")
-            admin_password = os.getenv("CONTEXT9_ADMIN_PASSWORD", "admin123")
+            admin_username = os.getenv("CONTEXT9_ADMIN_USERNAME", "ctx9-admin")
+            admin_password = os.getenv("CONTEXT9_ADMIN_PASSWORD", "88888888")
             create_default_admin(admin_username, admin_password)
             logger.info("Default admin user created successfully")
         else:

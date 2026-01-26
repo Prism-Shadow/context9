@@ -54,6 +54,8 @@ export default {
   'apiKeys.createFailed': '创建失败',
   'apiKeys.updateFailed': '更新失败',
   'apiKeys.deleteFailed': '删除失败',
+  'apiKeys.selectAll': '全选',
+  'apiKeys.deselectAll': '全不选',
   
   // Repositories
   'repositories.title': '仓库管理',
@@ -74,6 +76,9 @@ export default {
   'repositories.syncing': '同步中...',
   'repositories.showToken': '显示',
   'repositories.hideToken': '隐藏',
+  'repositories.githubUrl': 'GitHub 链接',
+  'repositories.parse': '解析',
+  'repositories.invalidGitHubUrl': '无效的 GitHub 链接',
   'repositories.ownerRequired': '所有者不能为空',
   'repositories.repoRequired': '仓库名不能为空',
   'repositories.branchRequired': '分支不能为空',

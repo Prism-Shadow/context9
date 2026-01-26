@@ -54,6 +54,8 @@ export default {
   'apiKeys.createFailed': '建立失敗',
   'apiKeys.updateFailed': '更新失敗',
   'apiKeys.deleteFailed': '刪除失敗',
+  'apiKeys.selectAll': '全選',
+  'apiKeys.deselectAll': '全不選',
   
   // Repositories
   'repositories.title': '儲存庫管理',
@@ -74,6 +76,9 @@ export default {
   'repositories.syncing': '同步中...',
   'repositories.showToken': '顯示',
   'repositories.hideToken': '隱藏',
+  'repositories.githubUrl': 'GitHub 連結',
+  'repositories.parse': '解析',
+  'repositories.invalidGitHubUrl': '無效的 GitHub 連結',
   'repositories.ownerRequired': '擁有者不能為空',
   'repositories.repoRequired': '儲存庫名稱不能為空',
   'repositories.branchRequired': '分支不能為空',

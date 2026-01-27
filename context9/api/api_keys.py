@@ -107,7 +107,7 @@ def create_api_key(
     admin: Admin = Depends(get_current_admin),
     db: Session = Depends(get_db),
 ):
-    """Create a new API key."""
+    """Create a new API key with access to all repositories by default."""
     client_tz = get_client_timezone(http_request)
     key_value, key_hash = generate_api_key()
     api_key = ApiKey(
@@ -119,6 +119,14 @@ def create_api_key(
     db.add(api_key)
     db.commit()
     db.refresh(api_key)
+
+    # Grant access to all existing repositories by default
+    all_repos = db.query(Repository).all()
+    for repo in all_repos:
+        relation = ApiKeyRepository(api_key_id=api_key.id, repository_id=repo.id)
+        db.add(relation)
+    db.commit()
+
     return CreateApiKeyResponse(
         id=api_key.id,
         name=api_key.name,

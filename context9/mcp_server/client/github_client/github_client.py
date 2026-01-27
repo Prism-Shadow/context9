@@ -441,7 +441,12 @@ class GitHubClient:
                 )
 
     def add_repository(
-        self, owner: str, repo: str, branch: str, root_spec_path: str = "spec.md"
+        self,
+        owner: str,
+        repo: str,
+        branch: str,
+        root_spec_path: str = "spec.md",
+        github_token: Optional[str] = None,
     ):
         """
         Add a new repository to the client and start syncing it.
@@ -451,6 +456,7 @@ class GitHubClient:
             repo: Repository name
             branch: Branch name
             root_spec_path: Root spec path (default: "spec.md")
+            github_token: GitHub token for authentication (optional)
         """
         # Check if repository already exists
         for existing_repo in self.repos:
@@ -462,7 +468,9 @@ class GitHubClient:
                 logger.warning(
                     f"Repository {owner}/{repo}/{branch} already exists, updating instead"
                 )
-                self.update_repository(owner, repo, branch, root_spec_path)
+                self.update_repository(
+                    owner, repo, branch, new_root_spec_path=root_spec_path, new_github_token=github_token
+                )
                 return
 
         # Create new repository dict
@@ -471,6 +479,7 @@ class GitHubClient:
             "repo": repo,
             "branch": branch,
             "root_spec_path": root_spec_path,
+            "github_token": github_token,
             "sync_timer": None,
             "is_syncing": False,
             "sync_lock": ReadWriteLock(),
@@ -502,6 +511,7 @@ class GitHubClient:
         new_repo: Optional[str] = None,
         new_branch: Optional[str] = None,
         new_root_spec_path: Optional[str] = None,
+        new_github_token: Optional[str] = None,
     ):
         """
         Update an existing repository configuration.
@@ -514,6 +524,7 @@ class GitHubClient:
             new_repo: New repository name (optional)
             new_branch: New branch name (optional)
             new_root_spec_path: New root spec path (optional)
+            new_github_token: New GitHub token (optional)
         """
         # Find the repository
         repo_dict = None
@@ -534,7 +545,7 @@ class GitHubClient:
                 new_root_spec_path if new_root_spec_path is not None else "spec.md"
             )
             self.add_repository(
-                final_owner, final_repo, final_branch, final_root_spec_path
+                final_owner, final_repo, final_branch, final_root_spec_path, new_github_token
             )
             return
 
@@ -552,6 +563,8 @@ class GitHubClient:
             repo_dict["branch"] = new_branch
         if new_root_spec_path is not None:
             repo_dict["root_spec_path"] = new_root_spec_path
+        if new_github_token is not None:
+            repo_dict["github_token"] = new_github_token
 
         # Sync the repository with new configuration
         try:

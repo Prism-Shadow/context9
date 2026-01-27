@@ -158,6 +158,7 @@ def create_repository(
                 repo=repo.repo,
                 branch=repo.branch,
                 root_spec_path=repo.root_spec_path,
+                github_token=repo.github_token,
             )
             logger.info(
                 f"Successfully synced repository {repo.owner}/{repo.repo}/{repo.branch} to github_client"
@@ -247,6 +248,9 @@ def update_repository(
                 new_branch=request.branch if request.branch is not None else None,
                 new_root_spec_path=request.root_spec_path
                 if request.root_spec_path is not None
+                else None,
+                new_github_token=request.github_token
+                if request.github_token is not None
                 else None,
             )
             logger.info(
@@ -357,6 +361,24 @@ def set_github_token(
     db.commit()
     db.refresh(repo)
 
+    # Sync with github_client
+    if mcp_server.github_client is not None:
+        try:
+            mcp_server.github_client.update_repository(
+                owner=repo.owner,
+                repo=repo.repo,
+                branch=repo.branch,
+                new_github_token=request.github_token,
+            )
+            logger.info(
+                f"Successfully synced github_token for {repo.owner}/{repo.repo}/{repo.branch} to github_client"
+            )
+        except Exception as e:
+            logger.error(
+                f"Failed to sync github_token for {repo.owner}/{repo.repo}/{repo.branch} to github_client: {e}",
+                exc_info=True,
+            )
+
     client_tz = get_client_timezone(http_request)
     return SetGithubTokenResponse(
         id=repo.id,
@@ -393,6 +415,24 @@ def update_github_token(
     db.commit()
     db.refresh(repo)
 
+    # Sync with github_client
+    if mcp_server.github_client is not None:
+        try:
+            mcp_server.github_client.update_repository(
+                owner=repo.owner,
+                repo=repo.repo,
+                branch=repo.branch,
+                new_github_token=request.github_token,
+            )
+            logger.info(
+                f"Successfully synced github_token update for {repo.owner}/{repo.repo}/{repo.branch} to github_client"
+            )
+        except Exception as e:
+            logger.error(
+                f"Failed to sync github_token update for {repo.owner}/{repo.repo}/{repo.branch} to github_client: {e}",
+                exc_info=True,
+            )
+
     client_tz = get_client_timezone(http_request)
     return SetGithubTokenResponse(
         id=repo.id,
@@ -423,11 +463,34 @@ def delete_github_token(
             detail="Repository not found",
         )
 
+    # Save repo info before clearing token (for github_client sync)
+    owner = repo.owner
+    repo_name = repo.repo
+    branch = repo.branch
+
     repo.github_token = None
     repo.github_token_created_at = None
     repo.github_token_updated_at = None
 
     db.commit()
+
+    # Sync with github_client - set token to None
+    if mcp_server.github_client is not None:
+        try:
+            # Find and update the repository in github_client
+            for r in mcp_server.github_client.repos:
+                if r["owner"] == owner and r["repo"] == repo_name and r["branch"] == branch:
+                    r["github_token"] = None
+                    logger.info(
+                        f"Successfully cleared github_token for {owner}/{repo_name}/{branch} in github_client"
+                    )
+                    break
+        except Exception as e:
+            logger.error(
+                f"Failed to clear github_token for {owner}/{repo_name}/{branch} in github_client: {e}",
+                exc_info=True,
+            )
+
     return {"message": "GitHub Token deleted successfully"}
 
 

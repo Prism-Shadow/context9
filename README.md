@@ -1,6 +1,6 @@
 ![Cover](public/context9.png)
 
-# Context9 - Bring Live Doc into Your AI Context
+# Context9 - Bring Live Doc into Your Agent Context
 
 <div align="center">
   <p><b>Up-to-date</b> &middot; <b>Local-first</b> &middot; <b>Low-hallucination</b></p>
@@ -30,7 +30,7 @@
 
 ---
 
-https://github.com/user-attachments/assets/1caa1934-6826-4f2b-b708-93b3407718e3
+https://github.com/user-attachments/assets/553ab8a2-5227-42fa-a8bd-692cd13c0b96
 
 ## Why Context9?
 

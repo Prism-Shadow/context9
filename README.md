@@ -22,7 +22,7 @@
 <div align="center">
 
 [![简体中文](https://img.shields.io/badge/docs-简体中文-orange)](./docs/README.zh-CN.md)
-[![繁體中文](https://img.shields.io/badge/docs-繁體中文-darkorange)](./docs/README.zh-TW.md)
+[![繁體中文](https://img.shields.io/badge/docs-繁體中文-darkorange)](./docs/README.zh-HK.md)
 [![日本語](https://img.shields.io/badge/docs-日本語-red)](./docs/README.ja.md)
 [![한국어 문서](https://img.shields.io/badge/docs-한국어-darkred)](./docs/README.ko.md)
 
@@ -45,7 +45,7 @@ https://github.com/user-attachments/assets/553ab8a2-5227-42fa-a8bd-692cd13c0b96
 
 
 <div style="text-align: center;">
-  <img src="public/overview.png" alt="overview" style="width: 60%; height: auto;">
+  <img src="public/overview.png" alt="overview" style="width: 80%; height: auto;">
 </div>
 
 
@@ -427,6 +427,10 @@ docker run -d \
 ## License
 
 Licensed under the Apache License, version 2.0. See [LICENSE](LICENSE) for details.
+
+## Acknowledge
+
+This repo benefits from [context7](https://github.com/upstash/context7). Thanks to the authors and contributors for their excellent work and inspiration.
 
 ## ⭐ Star History
 [![Star History Chart](https://api.star-history.com/svg?repos=Prism-Shadow/context9&type=Date)](https://www.star-history.com/#Prism-Shadow/context9&Date)

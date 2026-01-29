@@ -116,7 +116,7 @@ def create_repository(
     admin=Depends(get_current_admin),
     db: Session = Depends(get_db),
 ):
-    """Create a new repository."""
+    """Create a new repository. Sync to github_client first; only persist to DB on success."""
     # Check if repository already exists
     existing = (
         db.query(Repository)
@@ -133,13 +133,41 @@ def create_repository(
             detail="Repository already exists",
         )
 
+    if mcp_server.github_client is None:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="github_client not available, cannot sync repository",
+        )
+
+    # Sync with github_client first; do not create DB entry if sync fails
+    try:
+        mcp_server.github_client.add_repository(
+            owner=request.owner,
+            repo=request.repo,
+            branch=request.branch,
+            root_spec_path=request.root_spec_path,
+            github_token=request.github_token,
+        )
+        logger.info(
+            f"Successfully synced repository {request.owner}/{request.repo}/{request.branch} to github_client"
+        )
+    except Exception as e:
+        logger.error(
+            f"Failed to sync repository {request.owner}/{request.repo}/{request.branch} to github_client: {e}",
+            exc_info=True,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=f"Failed to sync repository: {e!s}",
+        ) from e
+
+    # Sync succeeded; create DB entry
     repo = Repository(
         owner=request.owner,
         repo=request.repo,
         branch=request.branch,
         root_spec_path=request.root_spec_path,
     )
-
     github_token_plain = None
     if request.github_token:
         repo.github_token = request.github_token
@@ -149,28 +177,6 @@ def create_repository(
     db.add(repo)
     db.commit()
     db.refresh(repo)
-
-    # Sync with github_client
-    if mcp_server.github_client is not None:
-        try:
-            mcp_server.github_client.add_repository(
-                owner=repo.owner,
-                repo=repo.repo,
-                branch=repo.branch,
-                root_spec_path=repo.root_spec_path,
-                github_token=repo.github_token,
-            )
-            logger.info(
-                f"Successfully synced repository {repo.owner}/{repo.repo}/{repo.branch} to github_client"
-            )
-        except Exception as e:
-            logger.error(
-                f"Failed to sync repository {repo.owner}/{repo.repo}/{repo.branch} to github_client: {e}",
-                exc_info=True,
-            )
-            # Don't fail the request if sync fails, just log the error
-    else:
-        logger.warning("github_client not available, repository sync will be skipped")
 
     client_tz = get_client_timezone(http_request)
     response_data = {
@@ -204,7 +210,7 @@ def update_repository(
     admin=Depends(get_current_admin),
     db: Session = Depends(get_db),
 ):
-    """Update repository configuration."""
+    """Update repository configuration. Sync to github_client first; only update DB on success."""
     repo = db.query(Repository).filter(Repository.id == repo_id).first()
     if not repo:
         raise HTTPException(
@@ -212,11 +218,49 @@ def update_repository(
             detail="Repository not found",
         )
 
-    # Save old values before updating (needed for github_client sync)
     old_owner = repo.owner
     old_repo = repo.repo
     old_branch = repo.branch
 
+    if mcp_server.github_client is None:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="github_client not available, cannot sync repository",
+        )
+
+    # Sync with github_client first; do not update DB if sync fails
+    new_owner = request.owner if request.owner is not None else repo.owner
+    new_repo = request.repo if request.repo is not None else repo.repo
+    new_branch = request.branch if request.branch is not None else repo.branch
+    try:
+        mcp_server.github_client.update_repository(
+            owner=old_owner,
+            repo=old_repo,
+            branch=old_branch,
+            new_owner=request.owner if request.owner is not None else None,
+            new_repo=request.repo if request.repo is not None else None,
+            new_branch=request.branch if request.branch is not None else None,
+            new_root_spec_path=request.root_spec_path
+            if request.root_spec_path is not None
+            else None,
+            new_github_token=request.github_token
+            if request.github_token is not None
+            else None,
+        )
+        logger.info(
+            f"Successfully synced repository update from {old_owner}/{old_repo}/{old_branch} to {new_owner}/{new_repo}/{new_branch} in github_client"
+        )
+    except Exception as e:
+        logger.error(
+            f"Failed to sync repository update {old_owner}/{old_repo}/{old_branch} to github_client: {e}",
+            exc_info=True,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=f"Failed to sync repository: {e!s}",
+        ) from e
+
+    # Sync succeeded; update DB
     github_token_plain = None
     if request.owner is not None:
         repo.owner = request.owner
@@ -235,33 +279,6 @@ def update_repository(
 
     db.commit()
     db.refresh(repo)
-
-    # Sync with github_client
-    if mcp_server.github_client is not None:
-        try:
-            mcp_server.github_client.update_repository(
-                owner=old_owner,
-                repo=old_repo,
-                branch=old_branch,
-                new_owner=request.owner if request.owner is not None else None,
-                new_repo=request.repo if request.repo is not None else None,
-                new_branch=request.branch if request.branch is not None else None,
-                new_root_spec_path=request.root_spec_path
-                if request.root_spec_path is not None
-                else None,
-                new_github_token=request.github_token
-                if request.github_token is not None
-                else None,
-            )
-            logger.info(
-                f"Successfully synced repository update from {old_owner}/{old_repo}/{old_branch} to {repo.owner}/{repo.repo}/{repo.branch} in github_client"
-            )
-        except Exception as e:
-            logger.error(
-                f"Failed to sync repository update {repo.owner}/{repo.repo}/{repo.branch} to github_client: {e}",
-                exc_info=True,
-            )
-            # Don't fail the request if sync fails, just log the error
 
     client_tz = get_client_timezone(http_request)
     response_data = {

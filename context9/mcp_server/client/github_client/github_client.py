@@ -489,14 +489,16 @@ class GitHubClient:
         # Add to repos list
         self.repos.append(new_repo)
 
-        # Sync the repository
+        # Sync the repository; on failure rollback and re-raise so caller does not persist to DB
         try:
             self._sync_repository(new_repo)
             logger.info(f"Successfully added repository {owner}/{repo}/{branch}")
         except Exception as e:
+            self.repos.remove(new_repo)
             logger.error(
                 f"Failed to sync newly added repository {owner}/{repo}/{branch}: {e}"
             )
+            raise
 
         # Start sync timer if enabled
         if self.sync_interval is not None:
@@ -554,6 +556,13 @@ class GitHubClient:
             repo_dict["sync_timer"].cancel()
             repo_dict["sync_timer"] = None
 
+        # Save old values for rollback on sync failure
+        old_owner = repo_dict["owner"]
+        old_repo = repo_dict["repo"]
+        old_branch = repo_dict["branch"]
+        old_root_spec_path = repo_dict["root_spec_path"]
+        old_github_token = repo_dict.get("github_token")
+
         # Update repository fields
         if new_owner is not None:
             repo_dict["owner"] = new_owner
@@ -566,16 +575,22 @@ class GitHubClient:
         if new_github_token is not None:
             repo_dict["github_token"] = new_github_token
 
-        # Sync the repository with new configuration
+        # Sync the repository with new configuration; on failure revert and re-raise
         try:
             self._sync_repository(repo_dict)
             logger.info(
                 f"Successfully updated repository {repo_dict['owner']}/{repo_dict['repo']}/{repo_dict['branch']}"
             )
         except Exception as e:
+            repo_dict["owner"] = old_owner
+            repo_dict["repo"] = old_repo
+            repo_dict["branch"] = old_branch
+            repo_dict["root_spec_path"] = old_root_spec_path
+            repo_dict["github_token"] = old_github_token
             logger.error(
-                f"Failed to sync updated repository {repo_dict['owner']}/{repo_dict['repo']}/{repo_dict['branch']}: {e}"
+                f"Failed to sync updated repository {old_owner}/{old_repo}/{old_branch}: {e}"
             )
+            raise
 
         # Restart sync timer if enabled
         if self.sync_interval is not None:
@@ -849,6 +864,8 @@ class GitHubClient:
 
         # Use read lock to allow concurrent reads while preventing race conditions with _sync_repository
         # Multiple readers can read simultaneously, but write operations (git reset --hard) require exclusive access
+        result_content = None
+        current_path_for_rewrite = None
         with ReadLockContext(repo["sync_lock"]):
             try:
                 # Check if file exists
@@ -876,12 +893,8 @@ class GitHubClient:
 
                 current_path = path.split("/", maxsplit=3)[3]
                 logger.debug(f"Current path: {current_path}")
-                content = rewrite_relative_paths(
-                    content, repo["owner"], repo["repo"], repo["branch"], current_path
-                )
-                logger.debug("Successfully converted to Context9 remotedoc:// URLs")
-
-                return content
+                result_content = content
+                current_path_for_rewrite = current_path
 
             except GitHubFileNotFoundError:
                 raise
@@ -904,6 +917,17 @@ class GitHubClient:
                 error_msg = f"Unexpected error while reading file {path}: {e}"
                 logger.error(error_msg, exc_info=True)
                 raise GitHubClientError(error_msg)
+
+        if result_content is not None:
+            result_content = rewrite_relative_paths(
+                result_content,
+                repo["owner"],
+                repo["repo"],
+                repo["branch"],
+                current_path_for_rewrite,
+            )
+            logger.debug("Successfully converted to Context9 remotedoc:// URLs")
+            return result_content
 
     def _fetch_repo_description(self, repo: Dict[str, Any]) -> Optional[str]:
         """

@@ -237,15 +237,11 @@ def update_repository(
             owner=old_owner,
             repo=old_repo,
             branch=old_branch,
-            new_owner=request.owner if request.owner is not None else None,
-            new_repo=request.repo if request.repo is not None else None,
-            new_branch=request.branch if request.branch is not None else None,
-            new_root_spec_path=request.root_spec_path
-            if request.root_spec_path is not None
-            else None,
-            new_github_token=request.github_token
-            if request.github_token is not None
-            else None,
+            new_owner=request.owner,
+            new_repo=request.repo,
+            new_branch=request.branch,
+            new_root_spec_path=request.root_spec_path,
+            new_github_token=request.github_token,
         )
         logger.info(
             f"Successfully synced repository update from {old_owner}/{old_repo}/{old_branch} to {new_owner}/{new_repo}/{new_branch} in github_client"

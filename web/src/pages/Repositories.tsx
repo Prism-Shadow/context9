@@ -28,6 +28,65 @@ interface RepositoryFormData {
   github_token?: string;
 }
 
+const REQUIRED_IMPORT_FIELDS = ['owner', 'repo', 'branch', 'root_spec_path'] as const;
+
+/**
+ * Validates each item in repositories array has required fields and correct types.
+ * Returns a list of error messages for invalid items; empty array means valid.
+ */
+function validateImportRepositories(
+  repositories: unknown[],
+  t: (key: string) => string
+): string[] {
+  const errors: string[] = [];
+  for (let i = 0; i < repositories.length; i++) {
+    const item = repositories[i];
+    const row = i + 1;
+    if (item === null || typeof item !== 'object' || Array.isArray(item)) {
+      errors.push(`${t('repositories.importRow')} ${row}: ${t('repositories.importInvalidItem')}`);
+      continue;
+    }
+    const record = item as Record<string, unknown>;
+    for (const field of REQUIRED_IMPORT_FIELDS) {
+      const value = record[field];
+      if (value === undefined || value === null) {
+        const fieldLabel =
+          field === 'owner'
+            ? t('repositories.owner')
+            : field === 'repo'
+              ? t('repositories.repo')
+              : field === 'branch'
+                ? t('repositories.branch')
+                : t('repositories.rootSpecPath');
+        errors.push(`${t('repositories.importRow')} ${row}: ${fieldLabel} ${t('repositories.importRequired')}`);
+      } else if (typeof value !== 'string') {
+        const fieldLabel =
+          field === 'owner'
+            ? t('repositories.owner')
+            : field === 'repo'
+              ? t('repositories.repo')
+              : field === 'branch'
+                ? t('repositories.branch')
+                : t('repositories.rootSpecPath');
+        errors.push(`${t('repositories.importRow')} ${row}: ${fieldLabel} ${t('repositories.importMustBeString')}`);
+      } else if (field !== 'root_spec_path' && value.trim() === '') {
+        const fieldLabel =
+          field === 'owner'
+            ? t('repositories.owner')
+            : field === 'repo'
+              ? t('repositories.repo')
+              : t('repositories.branch');
+        errors.push(`${t('repositories.importRow')} ${row}: ${fieldLabel} ${t('repositories.importRequired')}`);
+      }
+    }
+    const githubToken = record['github_token'];
+    if (githubToken !== undefined && githubToken !== null && typeof githubToken !== 'string') {
+      errors.push(`${t('repositories.importRow')} ${row}: ${t('repositories.githubToken')} ${t('repositories.importMustBeString')}`);
+    }
+  }
+  return errors;
+}
+
 export const Repositories: React.FC = () => {
   const { t } = useLocale();
   const [repositories, setRepositories] = useState<Repository[]>([]);
@@ -189,9 +248,29 @@ export const Repositories: React.FC = () => {
         setImportResultModal({ success: false, error: t('repositories.importInvalidFile') });
         return;
       }
+      const validationErrors = validateImportRepositories(data.repositories, t);
+      if (validationErrors.length > 0) {
+        setImportResultModal({
+          success: false,
+          error: `${t('repositories.importValidationErrors')}\n${validationErrors.join('\n')}`,
+        });
+        return;
+      }
+      const rawItems = data.repositories as unknown as Array<Record<string, unknown>>;
+      const normalizedData: ExportRepositoriesResponse = {
+        repositories: rawItems.map((item) => ({
+          owner: String(item.owner),
+          repo: String(item.repo),
+          branch: String(item.branch),
+          root_spec_path: typeof item.root_spec_path === 'string' && item.root_spec_path.trim() !== ''
+            ? item.root_spec_path
+            : 'spec.md',
+          github_token: item.github_token != null && item.github_token !== '' ? String(item.github_token) : null,
+        })),
+      };
       setIsImportSyncingModalOpen(true);
       try {
-        const result = await importRepositories(data);
+        const result = await importRepositories(normalizedData);
         await loadRepositories();
         setImportResultModal({ success: true, result });
       } catch (err: any) {

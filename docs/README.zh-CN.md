@@ -81,8 +81,12 @@ docker run -d \
 ### 添加仓库
 
 在 Context9 中填写仓库 owner、仓库名以及分支，即可添加你需要的仓库。
-
 - 对于私有仓库，还需要提供 [GitHub Token](https://github.com/settings/personal-access-tokens)
+
+使用 Context9 模板导出与导入仓库
+- **导出仓库（Export Repos）**：你可以点击 `Export Repos` 按钮，将当前的仓库配置导出为本地模板，方便后续复用。
+- **导入仓库（Import Repos）**：你可以点击`Import Repos`按钮，快速将一个 Context9 模板导入到你的仓库配置中。Context9 还提供了多个可供参考和使用的 [模板](../template_repo/)。
+
 
 ![repo](../public/repo.png)
 
@@ -362,5 +366,4 @@ CONTEXT9_PORT=8080
 
 ## ⭐ Star 历史
 
-[![Star History Chart](https://api.star-history.com/svg?repos=Prism-Shadow/context9&type=Date)](https://www.star-history.com/#Prism-Shadow/context9&Date)
-
+[![Star History Chart](https://api.star-history.com/svg?repos=Prism-Shadow/context9&type=date&legend=top-left)](https://www.star-history.com/#Prism-Shadow/context9&type=date&legend=top-left)

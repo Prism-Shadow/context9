@@ -81,8 +81,12 @@ docker run -d \
 ### 저장소 추가
 
 저장소 owner, 저장소 이름, 브랜치를 입력하여 필요한 저장소를 추가합니다.
-
 - 프라이빗 저장소의 경우 [GitHub Token](https://github.com/settings/personal-access-tokens)이 필요합니다.
+
+Context9 템플릿을 사용한 리포지토리 내보내기 및 가져오기
+- **리포지토리 내보내기(Export Repos)**: `Export Repos` 버튼을 클릭하면 현재 리포지토리 설정을 로컬 템플릿으로 내보낼 수 있어, 이후에 쉽게 재사용할 수 있습니다.
+- **리포지토리 가져오기(Import Repos)**: `Import Repos` 버튼을 클릭하면 Context9 템플릿을 리포지토리 설정으로 가져올 수 있습니다. Context9에서는 참고 및 사용을 위해 여러 개의 [템플릿](./template_repo/)도 제공합니다.
+
 
 ![repo](../public/repo.png)
 
@@ -284,4 +288,4 @@ uv run python scripts/start.py --github_sync_interval 60
 
 ## ⭐ Star 히스토리
 
-[![Star History Chart](https://api.star-history.com/svg?repos=Prism-Shadow/context9&type=Date)](https://www.star-history.com/#Prism-Shadow/context9&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=Prism-Shadow/context9&type=date&legend=top-left)](https://www.star-history.com/#Prism-Shadow/context9&type=date&legend=top-left)

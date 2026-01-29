@@ -68,3 +68,47 @@ export const updateGithubToken = async (
 export const deleteGithubToken = async (repositoryId: number): Promise<void> => {
   await api.delete(`/api/admin/repositories/${repositoryId}/github-token`);
 };
+
+// Export repositories (owner, repo, branch, root_spec_path, github_token)
+export interface ExportRepositoryItem {
+  owner: string;
+  repo: string;
+  branch: string;
+  root_spec_path: string;
+  github_token: string | null;
+}
+
+export interface ExportRepositoriesResponse {
+  repositories: ExportRepositoryItem[];
+}
+
+export const exportRepositories = async (): Promise<ExportRepositoriesResponse> => {
+  const response = await api.get<ExportRepositoriesResponse>(
+    '/api/admin/repositories/export'
+  );
+  return response.data;
+};
+
+// Import repositories from exported JSON
+export interface ImportRepositoriesError {
+  owner: string;
+  repo: string;
+  branch: string;
+  error: string;
+}
+
+export interface ImportRepositoriesResponse {
+  created: number;
+  skipped: number;
+  errors: ImportRepositoriesError[];
+}
+
+export const importRepositories = async (
+  data: ExportRepositoriesResponse
+): Promise<ImportRepositoriesResponse> => {
+  const response = await api.post<ImportRepositoriesResponse>(
+    '/api/admin/repositories/import',
+    data
+  );
+  return response.data;
+};

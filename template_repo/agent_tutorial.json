@@ -1,0 +1,22 @@
+{
+    "repositories": [
+      {
+        "owner": "datawhalechina",
+        "repo": "hello-agents",
+        "branch": "main",
+        "root_spec_path": "README.md"
+      },
+      {
+        "owner": "datawhalechina",
+        "repo": "llm-universe",
+        "branch": "main",
+        "root_spec_path": "README.md"
+      },
+      {
+        "owner": "datawhalechina",
+        "repo": "easy-langent",
+        "branch": "main",
+        "root_spec_path": "README.md"
+      }
+    ]
+  }

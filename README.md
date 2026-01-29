@@ -93,7 +93,13 @@ Remember to change the default password when you first log in to Context9.
 Add the repositories you need in Context9 by filling in the repository owner, repository name, and branch.
 - For private repositories, you also need to provide a [GitHub Token](https://github.com/settings/personal-access-tokens)
 
+Export & Import Repos using the Context9 template
+- **Export Repos**: You can click the `Export Repos` button to export the current repository configuration as a local template, making it easy to reuse later.
+- **Import Repos**: You can click the `Import Repos` button to import a Context9 template into your repository configuration. Context9 also provides several [templates](./template_repo/) for reference and use.
+
+
 ![repo](public/repo.png)
+
 
 ### Add API Keys
 
@@ -433,4 +439,5 @@ Licensed under the Apache License, version 2.0. See [LICENSE](LICENSE) for detai
 This repo benefits from [context7](https://github.com/upstash/context7). Thanks to the authors and contributors for their excellent work and inspiration.
 
 ## ⭐ Star History
-[![Star History Chart](https://api.star-history.com/svg?repos=Prism-Shadow/context9&type=Date)](https://www.star-history.com/#Prism-Shadow/context9&Date)
+
+[![Star History Chart](https://api.star-history.com/svg?repos=Prism-Shadow/context9&type=date&legend=top-left)](https://www.star-history.com/#Prism-Shadow/context9&type=date&legend=top-left)

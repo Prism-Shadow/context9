@@ -6,16 +6,15 @@ import type {
   CreateRepositoryResponse,
   PaginatedResponse,
   SetGithubTokenResponse,
-  VerifyGithubTokenResponse,
 } from '../utils/types';
 
-// 获取所有仓库
+// Get all repositories
 export const getRepositories = async (): Promise<PaginatedResponse<Repository>> => {
   const response = await api.get<PaginatedResponse<Repository>>('/api/admin/repositories');
   return response.data;
 };
 
-// 创建仓库
+// Create repository
 export const createRepository = async (
   data: CreateRepositoryRequest
 ): Promise<CreateRepositoryResponse> => {
@@ -23,7 +22,7 @@ export const createRepository = async (
   return response.data;
 };
 
-// 更新仓库
+// Update repository
 export const updateRepository = async (
   id: number,
   data: UpdateRepositoryRequest
@@ -32,12 +31,12 @@ export const updateRepository = async (
   return response.data;
 };
 
-// 删除仓库
+// Delete repository
 export const deleteRepository = async (id: number): Promise<void> => {
   await api.delete(`/api/admin/repositories/${id}`);
 };
 
-// 设置仓库的 GitHub Token
+// Set repository's GitHub token
 export const setGithubToken = async (
   repositoryId: number,
   token: string
@@ -51,7 +50,7 @@ export const setGithubToken = async (
   return response.data;
 };
 
-// 更新仓库的 GitHub Token
+// Update repository's GitHub token
 export const updateGithubToken = async (
   repositoryId: number,
   token: string
@@ -65,17 +64,7 @@ export const updateGithubToken = async (
   return response.data;
 };
 
-// 删除仓库的 GitHub Token
+// Delete repository's GitHub token
 export const deleteGithubToken = async (repositoryId: number): Promise<void> => {
   await api.delete(`/api/admin/repositories/${repositoryId}/github-token`);
-};
-
-// 验证仓库的 GitHub Token
-export const verifyGithubToken = async (
-  repositoryId: number
-): Promise<VerifyGithubTokenResponse> => {
-  const response = await api.post<VerifyGithubTokenResponse>(
-    `/api/admin/repositories/${repositoryId}/github-token/verify`
-  );
-  return response.data;
 };

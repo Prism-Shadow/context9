@@ -433,4 +433,5 @@ Licensed under the Apache License, version 2.0. See [LICENSE](LICENSE) for detai
 This repo benefits from [context7](https://github.com/upstash/context7). Thanks to the authors and contributors for their excellent work and inspiration.
 
 ## ⭐ Star History
-[![Star History Chart](https://api.star-history.com/svg?repos=Prism-Shadow/context9&type=Date)](https://www.star-history.com/#Prism-Shadow/context9&Date)
+
+[![Star History Chart](https://api.star-history.com/svg?repos=Prism-Shadow/context9&type=date&legend=top-left)](https://www.star-history.com/#Prism-Shadow/context9&type=date&legend=top-left)

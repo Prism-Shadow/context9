@@ -1,0 +1,22 @@
+{
+    "repositories": [
+      {
+        "owner": "googleapis",
+        "repo": "python-genai",
+        "branch": "main",
+        "root_spec_path": "README.md"
+      },
+      {
+        "owner": "anthropics",
+        "repo": "claude-agent-sdk-python",
+        "branch": "main",
+        "root_spec_path": "README.md"
+      },
+      {
+        "owner": "Prism-Shadow",
+        "repo": "AgentHub",
+        "branch": "main",
+        "root_spec_path": "llmsdk_docs/README.md"
+      }
+    ]
+  }

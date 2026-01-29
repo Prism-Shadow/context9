@@ -74,6 +74,134 @@ class VerifyGithubTokenResponse(BaseModel):
     error: Optional[str] = None
 
 
+class ExportRepositoryItem(BaseModel):
+    owner: str
+    repo: str
+    branch: str
+    root_spec_path: str
+    github_token: Optional[str] = None
+
+
+class ExportRepositoriesResponse(BaseModel):
+    repositories: List[ExportRepositoryItem]
+
+
+class ImportRepositoriesRequest(BaseModel):
+    repositories: List[ExportRepositoryItem]
+
+
+class ImportRepositoriesError(BaseModel):
+    owner: str
+    repo: str
+    branch: str
+    error: str
+
+
+class ImportRepositoriesResponse(BaseModel):
+    created: int = 0
+    skipped: int = 0
+    errors: List[ImportRepositoriesError] = []
+
+
+@router.post(
+    "/import",
+    response_model=ImportRepositoriesResponse,
+)
+def import_repositories(
+    request: ImportRepositoriesRequest,
+    http_request: Request,
+    admin=Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    """Import repositories from exported JSON (skips duplicates by owner/repo/branch)."""
+    created = 0
+    skipped = 0
+    errors: List[ImportRepositoriesError] = []
+
+    for item in request.repositories:
+        existing = (
+            db.query(Repository)
+            .filter(
+                Repository.owner == item.owner,
+                Repository.repo == item.repo,
+                Repository.branch == item.branch,
+            )
+            .first()
+        )
+        if existing:
+            skipped += 1
+            continue
+
+        try:
+            repo = Repository(
+                owner=item.owner,
+                repo=item.repo,
+                branch=item.branch,
+                root_spec_path=item.root_spec_path or "spec.md",
+            )
+            if item.github_token:
+                repo.github_token = item.github_token
+                repo.github_token_created_at = get_utc_now()
+            db.add(repo)
+            db.commit()
+            db.refresh(repo)
+            created += 1
+
+            if mcp_server.github_client is not None:
+                try:
+                    mcp_server.github_client.add_repository(
+                        owner=repo.owner,
+                        repo=repo.repo,
+                        branch=repo.branch,
+                        root_spec_path=repo.root_spec_path,
+                        github_token=repo.github_token,
+                    )
+                    logger.info(
+                        f"Imported and synced repository {repo.owner}/{repo.repo}/{repo.branch}"
+                    )
+                except Exception as e:
+                    logger.error(
+                        f"Failed to sync imported repository {repo.owner}/{repo.repo}/{repo.branch}: {e}",
+                        exc_info=True,
+                    )
+        except Exception as e:
+            db.rollback()
+            errors.append(
+                ImportRepositoriesError(
+                    owner=item.owner,
+                    repo=item.repo,
+                    branch=item.branch,
+                    error=str(e),
+                )
+            )
+
+    return ImportRepositoriesResponse(created=created, skipped=skipped, errors=errors)
+
+
+@router.get(
+    "/export",
+    response_model=ExportRepositoriesResponse,
+    response_model_exclude_none=True,
+)
+def export_repositories(
+    admin=Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    """Export all repositories with config (including github_token when set) for backup."""
+    repos = db.query(Repository).all()
+    items = [
+        ExportRepositoryItem(
+            owner=repo.owner,
+            repo=repo.repo,
+            branch=repo.branch,
+            root_spec_path=repo.root_spec_path,
+            github_token=repo.github_token,
+        )
+        for repo in repos
+    ]
+    return ExportRepositoriesResponse(repositories=items)
+
+
 @router.get("", response_model=dict)
 def get_repositories(
     request: Request,

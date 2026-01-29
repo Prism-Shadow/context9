@@ -81,8 +81,12 @@ docker run -d \
 ### リポジトリの追加
 
 リポジトリの owner、リポジトリ名、ブランチを入力して、必要なリポジトリを追加します。
-
 - プライベートリポジトリの場合は [GitHub Token](https://github.com/settings/personal-access-tokens) が必要です。
+
+Context9 テンプレートを使用したリポジトリのエクスポート＆インポート
+- **リポジトリのエクスポート（Export Repos）**：`Export Repos` ボタンをクリックすると、現在のリポジトリ設定をローカルテンプレートとしてエクスポートでき、後から簡単に再利用できます。
+- **リポジトリのインポート（Import Repos）**：`Import Repos` ボタンをクリックすると、Context9 テンプレートをリポジトリ設定にインポートできます。Context9 では、参考や利用のためにいくつかの [テンプレート](../template_repo/) も提供しています。
+
 
 ![repo](../public/repo.png)
 
@@ -284,5 +288,4 @@ uv run python scripts/start.py --github_sync_interval 60
 
 ## ⭐ Star 履歴
 
-[![Star History Chart](https://api.star-history.com/svg?repos=Prism-Shadow/context9&type=Date)](https://www.star-history.com/#Prism-Shadow/context9&Date)
-
+[![Star History Chart](https://api.star-history.com/svg?repos=Prism-Shadow/context9&type=date&legend=top-left)](https://www.star-history.com/#Prism-Shadow/context9&type=date&legend=top-left)

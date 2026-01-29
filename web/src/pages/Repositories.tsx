@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useLocale } from '../contexts/LocaleContext';
 import {
@@ -6,6 +6,12 @@ import {
   createRepository,
   updateRepository,
   deleteRepository,
+  exportRepositories,
+  importRepositories,
+} from '../services/repositories';
+import type {
+  ExportRepositoriesResponse,
+  ImportRepositoriesResponse,
 } from '../services/repositories';
 import { Table, Column } from '../components/common/Table';
 import { Modal } from '../components/common/Modal';
@@ -22,6 +28,65 @@ interface RepositoryFormData {
   github_token?: string;
 }
 
+const REQUIRED_IMPORT_FIELDS = ['owner', 'repo', 'branch', 'root_spec_path'] as const;
+
+/**
+ * Validates each item in repositories array has required fields and correct types.
+ * Returns a list of error messages for invalid items; empty array means valid.
+ */
+function validateImportRepositories(
+  repositories: unknown[],
+  t: (key: string) => string
+): string[] {
+  const errors: string[] = [];
+  for (let i = 0; i < repositories.length; i++) {
+    const item = repositories[i];
+    const row = i + 1;
+    if (item === null || typeof item !== 'object' || Array.isArray(item)) {
+      errors.push(`${t('repositories.importRow')} ${row}: ${t('repositories.importInvalidItem')}`);
+      continue;
+    }
+    const record = item as Record<string, unknown>;
+    for (const field of REQUIRED_IMPORT_FIELDS) {
+      const value = record[field];
+      if (value === undefined || value === null) {
+        const fieldLabel =
+          field === 'owner'
+            ? t('repositories.owner')
+            : field === 'repo'
+              ? t('repositories.repo')
+              : field === 'branch'
+                ? t('repositories.branch')
+                : t('repositories.rootSpecPath');
+        errors.push(`${t('repositories.importRow')} ${row}: ${fieldLabel} ${t('repositories.importRequired')}`);
+      } else if (typeof value !== 'string') {
+        const fieldLabel =
+          field === 'owner'
+            ? t('repositories.owner')
+            : field === 'repo'
+              ? t('repositories.repo')
+              : field === 'branch'
+                ? t('repositories.branch')
+                : t('repositories.rootSpecPath');
+        errors.push(`${t('repositories.importRow')} ${row}: ${fieldLabel} ${t('repositories.importMustBeString')}`);
+      } else if (field !== 'root_spec_path' && value.trim() === '') {
+        const fieldLabel =
+          field === 'owner'
+            ? t('repositories.owner')
+            : field === 'repo'
+              ? t('repositories.repo')
+              : t('repositories.branch');
+        errors.push(`${t('repositories.importRow')} ${row}: ${fieldLabel} ${t('repositories.importRequired')}`);
+      }
+    }
+    const githubToken = record['github_token'];
+    if (githubToken !== undefined && githubToken !== null && typeof githubToken !== 'string') {
+      errors.push(`${t('repositories.importRow')} ${row}: ${t('repositories.githubToken')} ${t('repositories.importMustBeString')}`);
+    }
+  }
+  return errors;
+}
+
 export const Repositories: React.FC = () => {
   const { t } = useLocale();
   const [repositories, setRepositories] = useState<Repository[]>([]);
@@ -32,6 +97,16 @@ export const Repositories: React.FC = () => {
   const [editingRepo, setEditingRepo] = useState<Repository | null>(null);
   const [showToken, setShowToken] = useState(false);
   const [githubUrl, setGithubUrl] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isImportSyncingModalOpen, setIsImportSyncingModalOpen] = useState(false);
+  const [importResultModal, setImportResultModal] = useState<
+    | { success: true; result: ImportRepositoriesResponse }
+    | { success: false; error: string }
+    | null
+  >(null);
+  const [deleteConfirmRepo, setDeleteConfirmRepo] = useState<Repository | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const {
     register: registerCreate,
@@ -116,13 +191,101 @@ export const Repositories: React.FC = () => {
     }
   };
 
-  const handleDelete = async (repo: Repository) => {
-    if (!confirm(`${t('repositories.confirmDelete')} "${repo.owner}/${repo.repo}"?`)) return;
+  const handleDeleteClick = (repo: Repository) => {
+    setDeleteError(null);
+    setDeleteConfirmRepo(repo);
+  };
+
+  const handleDeleteConfirmClose = () => {
+    setDeleteConfirmRepo(null);
+    setDeleteError(null);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteConfirmRepo) return;
+    setDeleteLoading(true);
+    setDeleteError(null);
     try {
-      await deleteRepository(repo.id);
+      await deleteRepository(deleteConfirmRepo.id);
+      handleDeleteConfirmClose();
       await loadRepositories();
     } catch (error: any) {
-      alert(error.response?.data?.detail || t('repositories.deleteFailed'));
+      setDeleteError(error.response?.data?.detail || t('repositories.deleteFailed'));
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  const handleExportRepos = async () => {
+    try {
+      const data = await exportRepositories();
+      const blob = new Blob([JSON.stringify(data, null, 2)], {
+        type: 'application/json',
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'ctx9-repositories.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (error: any) {
+      alert(error.response?.data?.detail || t('repositories.exportFailed'));
+    }
+  };
+
+  const handleImportReposClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleImportReposFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text) as ExportRepositoriesResponse;
+      if (!data.repositories || !Array.isArray(data.repositories)) {
+        setImportResultModal({ success: false, error: t('repositories.importInvalidFile') });
+        return;
+      }
+      const validationErrors = validateImportRepositories(data.repositories, t);
+      if (validationErrors.length > 0) {
+        setImportResultModal({
+          success: false,
+          error: `${t('repositories.importValidationErrors')}\n${validationErrors.join('\n')}`,
+        });
+        return;
+      }
+      const rawItems = data.repositories as unknown as Array<Record<string, unknown>>;
+      const normalizedData: ExportRepositoriesResponse = {
+        repositories: rawItems.map((item) => ({
+          owner: String(item.owner),
+          repo: String(item.repo),
+          branch: String(item.branch),
+          root_spec_path: typeof item.root_spec_path === 'string' && item.root_spec_path.trim() !== ''
+            ? item.root_spec_path
+            : 'spec.md',
+          github_token: item.github_token != null && item.github_token !== '' ? String(item.github_token) : null,
+        })),
+      };
+      setIsImportSyncingModalOpen(true);
+      try {
+        const result = await importRepositories(normalizedData);
+        await loadRepositories();
+        setImportResultModal({ success: true, result });
+      } catch (err: any) {
+        const message =
+          err.response?.data?.detail ||
+          (err instanceof SyntaxError ? t('repositories.importInvalidFile') : t('repositories.importFailed'));
+        setImportResultModal({ success: false, error: message });
+      } finally {
+        setIsImportSyncingModalOpen(false);
+      }
+    } catch (err: any) {
+      setImportResultModal({
+        success: false,
+        error: err instanceof SyntaxError ? t('repositories.importInvalidFile') : t('repositories.importFailed'),
+      });
     }
   };
 
@@ -173,14 +336,29 @@ export const Repositories: React.FC = () => {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('repositories.title')}</h1>
-        <Button onClick={() => setIsCreateModalOpen(true)}>{t('repositories.add')}</Button>
+        <div className="flex gap-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".json,application/json"
+            className="hidden"
+            onChange={handleImportReposFile}
+          />
+          <Button variant="secondary" onClick={handleImportReposClick}>
+            {t('repositories.importRepos')}
+          </Button>
+          <Button variant="secondary" onClick={handleExportRepos}>
+            {t('repositories.exportRepo')}
+          </Button>
+          <Button onClick={() => setIsCreateModalOpen(true)}>{t('repositories.add')}</Button>
+        </div>
       </div>
 
       <Table
         data={repositories}
         columns={columns}
         onEdit={handleEdit}
-        onDelete={handleDelete}
+        onDelete={handleDeleteClick}
       />
 
       <Modal
@@ -298,6 +476,107 @@ export const Repositories: React.FC = () => {
           </svg>
           <p className="text-gray-600 dark:text-gray-400">{t('repositories.syncing')}</p>
         </div>
+      </Modal>
+
+      <Modal
+        isOpen={isImportSyncingModalOpen}
+        onClose={() => {}}
+        title=""
+        closeOnOverlayClick={false}
+        showCloseButton={false}
+      >
+        <div className="flex flex-col items-center justify-center py-6 gap-3">
+          <svg
+            className="animate-spin h-10 w-10 text-primary-600 dark:text-primary-400"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            aria-label="Loading"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            />
+          </svg>
+          <p className="text-gray-600 dark:text-gray-400">{t('repositories.importSyncing')}</p>
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={importResultModal !== null}
+        onClose={() => setImportResultModal(null)}
+        title={t('repositories.importResultTitle')}
+      >
+        {importResultModal && (
+          <div className="space-y-4">
+            {importResultModal.success ? (
+              <>
+                <div className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
+                  {importResultModal.result.created > 0 && (
+                    <p>{t('repositories.importCreated')}: {importResultModal.result.created}</p>
+                  )}
+                  {importResultModal.result.skipped > 0 && (
+                    <p>{t('repositories.importSkipped')}: {importResultModal.result.skipped}</p>
+                  )}
+                  {importResultModal.result.errors.length > 0 && (
+                    <>
+                      <p>{t('repositories.importErrors')}: {importResultModal.result.errors.length}</p>
+                      <ul className="mt-2 pl-4 list-disc text-red-600 dark:text-red-400 max-h-32 overflow-y-auto">
+                        {importResultModal.result.errors.map((err, i) => (
+                          <li key={i}>{err.owner}/{err.repo} ({err.branch}): {err.error}</li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+                </div>
+                {importResultModal.result.created === 0 &&
+                  importResultModal.result.skipped === 0 &&
+                  importResultModal.result.errors.length === 0 && (
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{t('repositories.importDone')}</p>
+                )}
+              </>
+            ) : (
+              <p className="text-sm text-red-600 dark:text-red-400">{importResultModal.error}</p>
+            )}
+            <div className="flex justify-end pt-2">
+              <Button onClick={() => setImportResultModal(null)}>{t('common.close')}</Button>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      <Modal
+        isOpen={deleteConfirmRepo !== null}
+        onClose={handleDeleteConfirmClose}
+        title={t('repositories.deleteConfirmTitle')}
+      >
+        {deleteConfirmRepo && (
+          <div className="space-y-4">
+            <p className="text-sm text-gray-700 dark:text-gray-300">
+              {t('repositories.confirmDelete')} &quot;{deleteConfirmRepo.owner}/{deleteConfirmRepo.repo}&quot;?
+            </p>
+            {deleteError && (
+              <p className="text-sm text-red-600 dark:text-red-400">{deleteError}</p>
+            )}
+            <div className="flex gap-2 justify-end pt-2">
+              <Button variant="secondary" onClick={handleDeleteConfirmClose} disabled={deleteLoading}>
+                {t('common.cancel')}
+              </Button>
+              <Button variant="danger" onClick={handleDeleteConfirm} disabled={deleteLoading}>
+                {deleteLoading ? t('repositories.deleting') : t('common.delete')}
+              </Button>
+            </div>
+          </div>
+        )}
       </Modal>
 
       <Modal

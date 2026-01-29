@@ -81,8 +81,12 @@ docker run -d \
 ### 新增儲存庫
 
 在 Context9 中填寫儲存庫擁有者（owner）、儲存庫名稱與分支，即可新增所需的儲存庫。
-
 - 私有儲存庫需要額外提供 [GitHub Token](https://github.com/settings/personal-access-tokens)
+
+使用 Context9 範本匯出與匯入倉庫
+- **匯出倉庫（Export Repos）**：你可以點擊 `Export Repos` 按鈕，將目前的倉庫設定匯出為本地範本，方便之後重複使用。
+- **匯入倉庫（Import Repos）**：你可以點擊 `Import Repos` 按鈕，將 Context9 範本匯入到你的倉庫設定中。Context9 也提供了數個可供參考與使用的 [範本](../template_repo/)。
+
 
 ![repo](../public/repo.png)
 
@@ -284,5 +288,4 @@ uv run python scripts/start.py --github_sync_interval 60
 
 ## ⭐ Star 歷史
 
-[![Star History Chart](https://api.star-history.com/svg?repos=Prism-Shadow/context9&type=Date)](https://www.star-history.com/#Prism-Shadow/context9&Date)
-
+[![Star History Chart](https://api.star-history.com/svg?repos=Prism-Shadow/context9&type=date&legend=top-left)](https://www.star-history.com/#Prism-Shadow/context9&type=date&legend=top-left)

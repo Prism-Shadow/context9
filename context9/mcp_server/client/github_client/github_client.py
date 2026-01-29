@@ -588,7 +588,7 @@ class GitHubClient:
             repo_dict["root_spec_path"] = old_root_spec_path
             repo_dict["github_token"] = old_github_token
             logger.error(
-                f"Failed to sync updated repository {old_owner}/{old_repo}/{old_branch}: {e}"
+                f"Failed to sync updated repository {old_owner}/{old_repo}/{old_branch}"
             )
             raise
 

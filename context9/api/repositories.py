@@ -257,7 +257,7 @@ def update_repository(
         )
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=f"Failed to sync repository: {e!s}",
+            detail="Failed to sync repository update. Please check your repository settings and GitHub token.",
         ) from e
 
     # Sync succeeded; update DB
